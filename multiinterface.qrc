@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/MultiInterface">
+        <file alias="NOLOGIN">Resources/User.png</file>
+        <file alias="LOGIN">Resources/User2.png</file>
+        <file alias="ALERT">Resources/Alert.png</file>
+        <file alias="turnImage">Resources/turnImage.png</file>
+    </qresource>
+</RCC>
