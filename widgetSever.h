@@ -6,7 +6,7 @@
 #include <windows.h>
 #include "Stool.h"
 #include <QCloseEvent>
-//#define VNCTEST
+#define VNCTEST
 #ifdef VNCTEST
 #using "E:\MultiInterface\x64\123\BADControl.dll"
 #using "E:\MultiInterface\x64\123\System.Windows.Forms.dll"

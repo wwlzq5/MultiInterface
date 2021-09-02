@@ -1,5 +1,5 @@
 #include "multiinterface.h"
-//#define TESTREMOTE
+#define TESTREMOTE
 MultiInterface::MultiInterface(QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -157,12 +157,9 @@ void MultiInterface::ChangeVncState(int nTest)
 	SendBasicNet(IMAGE);
 	for(int i = 0;i<3;i++)
 	{
-		if(i != nTest)
-		{
-			m_sever[i]->close();
-		}
+		m_sever[i]->close();
 	}
-	Sleep(1000);
+	Sleep(2000);
 	m_sever[nTest]->SetParam(2500,1500);
 	m_sever[nTest]->show();
 }
@@ -330,21 +327,21 @@ void MultiInterface::onServerDataReady()
 	{
 		if(nSheetPage != NLEADING)
 		{
-			slots_clickAccont(0);
+			ChangeVncState(0);
 			nSheetPage = NLEADING;
 		}
 	}else if(((MyStruct*)buffer.data())->nState == NCLAMPING)
 	{
 		if(nSheetPage != NCLAMPING)
 		{
-			slots_clickAccont(1);
+			ChangeVncState(1);
 			nSheetPage = NCLAMPING;
 		}
 	}else if(((MyStruct*)buffer.data())->nState == NBACKING)
 	{
 		if(nSheetPage != NBACKING)
 		{
-			slots_clickAccont(2);
+			ChangeVncState(2);
 			nSheetPage = NBACKING;
 		}
 	}else if(((MyStruct*)buffer.data())->nState == MAININTERFACE)
