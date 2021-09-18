@@ -1,0 +1,6 @@
+[OperationInfo]
+INFO_1=2021-9-2 13:59:25 into Front Interface
+INFO_2=2021-9-2 14:0:26 into Alert Interface
+
+[setup]
+total=2

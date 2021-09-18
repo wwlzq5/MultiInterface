@@ -1,0 +1,11 @@
+[OperationInfo]
+INFO_1=2021-8-10 14:24:18 into IOCard Interface
+INFO_2=2021-8-10 14:24:31 into IOCard Interface
+INFO_3=2021-8-10 14:26:22 into IOCard Interface
+INFO_4=2021-8-10 14:28:13 into Alert Interface
+INFO_5=2021-8-10 14:29:58 into Alert Interface
+INFO_6=2021-8-10 14:30:54 into Alert Interface
+INFO_7=2021-8-10 14:32:6 into Alert Interface
+
+[setup]
+total=7

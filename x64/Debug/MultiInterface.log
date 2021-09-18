@@ -1,0 +1,164 @@
+﻿  Moc'ing multiinterface.h...
+  Qt: Untested Windows version 6.2 detected!
+  Uic'ing multiinterface.ui...
+  Qt: Untested Windows version 6.2 detected!
+  Could not create output file
+  Moc'ing widgetAlert.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing widgetWarning.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing widgetUser.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing IOCard.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing clogfile.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing widgetSever.h...
+  Qt: Untested Windows version 6.2 detected!
+  Rcc'ing multiinterface.qrc...
+  Qt: Untested Windows version 6.2 detected!
+  Uic'ing Sever.ui...
+  Qt: Untested Windows version 6.2 detected!
+  Uic'ing IOCard.ui...
+  Qt: Untested Windows version 6.2 detected!
+E:\MultiInterface\MultiInterface\IOCard.ui : warning : The name 'layoutWidget' (QWidget) is already in use, defaulting to 'layoutWidget1'.
+  Uic'ing AlertWidget.ui...
+  Qt: Untested Windows version 6.2 detected!
+  Uic'ing userwidget.ui...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing dhbasewidget.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing pieview.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing qcustomplot.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing widget_count.h...
+  Qt: Untested Windows version 6.2 detected!
+  Uic'ing ProdectMode.ui...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing widgetMode.h...
+  Qt: Untested Windows version 6.2 detected!
+  clogfile.cpp
+  database.cpp
+e:\multiinterface\multiinterface\database.h(3): fatal error C1083: 无法打开包括文件:“qsqldatabase.h”: No such file or directory
+  dhbasewidget.cpp
+  moc_clogfile.cpp
+  moc_dhbasewidget.cpp
+  moc_IOCard.cpp
+  moc_multiinterface.cpp
+e:\multiinterface\multiinterface\generatedfiles\debug\../../multiinterface.h(7): fatal error C1083: 无法打开包括文件:“QTcpServer”: No such file or directory
+  moc_pieview.cpp
+  moc_qcustomplot.cpp
+  moc_widgetAlert.cpp
+  moc_widgetMode.cpp
+  moc_widgetSever.cpp
+  moc_widgetUser.cpp
+  moc_widgetWarning.cpp
+  moc_widget_count.cpp
+  IOCard.cpp
+  main.cpp
+e:\multiinterface\multiinterface\multiinterface.h(7): fatal error C1083: 无法打开包括文件:“QTcpServer”: No such file or directory
+  multiinterface.cpp
+e:\multiinterface\multiinterface\multiinterface.h(7): fatal error C1083: 无法打开包括文件:“QTcpServer”: No such file or directory
+  pieview.cpp
+  qcustomplot.cpp
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xutility(2176): warning C4996: 'std::_Copy_impl': Function call with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct. To disable this warning, use -D_SCL_SECURE_NO_WARNINGS. See documentation on how to use Visual C++ 'Checked Iterators'
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xutility(2157) : 参见“std::_Copy_impl”的声明
+          qcustomplot.cpp(20982): 参见对正在编译的函数 模板 实例化“_OutIt std::copy<const QCPGraphData*,QCPGraphData*>(_InIt,_InIt,_OutIt)”的引用
+          with
+          [
+              _OutIt=QCPGraphData *,
+              _InIt=const QCPGraphData *
+          ]
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xutility(2157) : 参见“std::_Copy_impl”的声明
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xutility(2157) : 参见“std::_Copy_impl”的声明
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xutility(2157) : 参见“std::_Copy_impl”的声明
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xutility(2157) : 参见“std::_Copy_impl”的声明
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xutility(2157) : 参见“std::_Copy_impl”的声明
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xutility(2455): warning C4996: 'std::_Copy_backward': Function call with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct. To disable this warning, use -D_SCL_SECURE_NO_WARNINGS. See documentation on how to use Visual C++ 'Checked Iterators'
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xutility(2440) : 参见“std::_Copy_backward”的声明
+          e:\multiinterface\multiinterface\qcustomplot.h(3200): 参见对正在编译的函数 模板 实例化“_BidIt2 std::copy_backward<QCPGraphData*,QCPGraphData*>(_BidIt1,_BidIt1,_BidIt2)”的引用
+          with
+          [
+              _BidIt2=QCPGraphData *,
+              _BidIt1=QCPGraphData *
+          ]
+          e:\multiinterface\multiinterface\qcustomplot.h(3190): 编译类 模板 成员函数“void QCPDataContainer<DataType>::preallocateGrow(int)”时
+          with
+          [
+              DataType=QCPGraphData
+          ]
+          e:\multiinterface\multiinterface\qcustomplot.h(2749): 参见对正在编译的函数 模板 实例化“void QCPDataContainer<DataType>::preallocateGrow(int)”的引用
+          with
+          [
+              DataType=QCPGraphData
+          ]
+          e:\multiinterface\multiinterface\qcustomplot.h(4104): 编译类 模板 成员函数“QCPAbstractPlottable1D<DataType>::QCPAbstractPlottable1D(QCPAxis *,QCPAxis *)”时
+          with
+          [
+              DataType=QCPGraphData
+          ]
+          qcustomplot.cpp(20110): 参见对正在编译的函数 模板 实例化“QCPAbstractPlottable1D<DataType>::QCPAbstractPlottable1D(QCPAxis *,QCPAxis *)”的引用
+          with
+          [
+              DataType=QCPGraphData
+          ]
+          e:\multiinterface\multiinterface\qcustomplot.h(5164): 参见对正在编译的类 模板 实例化“QCPAbstractPlottable1D<DataType>”的引用
+          with
+          [
+              DataType=QCPGraphData
+          ]
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xutility(2440) : 参见“std::_Copy_backward”的声明
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xutility(2440) : 参见“std::_Copy_backward”的声明
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xutility(2440) : 参见“std::_Copy_backward”的声明
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\xutility(2440) : 参见“std::_Copy_backward”的声明
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\algorithm(3761): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\algorithm(3776): 参见对正在编译的函数 模板 实例化“void std::_Median<_RanIt,bool(__cdecl *)(const QCPDataRange &,const QCPDataRange &)>(_RanIt,_RanIt,_RanIt,_Pr)”的引用
+          with
+          [
+              _RanIt=QList<QCPDataRange>::iterator,
+              _Pr=bool (__cdecl *)(const QCPDataRange &,const QCPDataRange &)
+          ]
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\algorithm(3838): 参见对正在编译的函数 模板 实例化“std::pair<_Ty1,_Ty2> std::_Unguarded_partition<_RanIt,bool(__cdecl *)(const QCPDataRange &,const QCPDataRange &)>(_RanIt,_RanIt,_Pr)”的引用
+          with
+          [
+              _Ty1=QList<QCPDataRange>::iterator,
+              _Ty2=QList<QCPDataRange>::iterator,
+              _RanIt=QList<QCPDataRange>::iterator,
+              _Pr=bool (__cdecl *)(const QCPDataRange &,const QCPDataRange &)
+          ]
+          C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\algorithm(3868): 参见对正在编译的函数 模板 实例化“void std::_Sort<_Iter,int,bool(__cdecl *)(const QCPDataRange &,const QCPDataRange &)>(_RanIt,_RanIt,_Diff,_Pr)”的引用
+          with
+          [
+              _Iter=QList<QCPDataRange>::iterator,
+              _RanIt=QList<QCPDataRange>::iterator,
+              _Diff=int,
+              _Pr=bool (__cdecl *)(const QCPDataRange &,const QCPDataRange &)
+          ]
+          qcustomplot.cpp(2585): 参见对正在编译的函数 模板 实例化“void std::sort<QList<T>::iterator,bool(__cdecl *)(const QCPDataRange &,const QCPDataRange &)>(_RanIt,_RanIt,_Pr)”的引用
+          with
+          [
+              T=QCPDataRange,
+              _RanIt=QList<QCPDataRange>::iterator,
+              _Pr=bool (__cdecl *)(const QCPDataRange &,const QCPDataRange &)
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\algorithm(3762): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\algorithm(3763): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\include\algorithm(3764): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+  正在生成代码...
+  正在编译...
+  widgetAlert.cpp
+widgetAlert.cpp(33): error C2664: “QString::fromLocal8Bit”: 不能将参数 1 从“QString”转换为“const char *”
+          没有可用于执行该转换的用户定义的转换运算符，或者无法调用该运算符
+widgetAlert.cpp(94): error C2039: “text”: 不是“QComboBox”的成员
+          d:\4.8.2_64\include\qtgui\qcombobox.h(62) : 参见“QComboBox”的声明
+  widgetMode.cpp
+widgetMode.cpp(56): error C2664: “QString::fromLocal8Bit”: 不能将参数 1 从“QString”转换为“const char *”
+          没有可用于执行该转换的用户定义的转换运算符，或者无法调用该运算符
+  widgetUser.cpp
+widgetUser.cpp(17): error C2039: “setPixmap”: 不是“QPushButton”的成员
+          d:\4.8.2_64\include\qtgui\qpushbutton.h(57) : 参见“QPushButton”的声明
+  widgetwarning.cpp
+  widgetSever.cpp
+  widget_count.cpp
+  正在生成代码...

@@ -1,0 +1,7 @@
+[OperationInfo]
+INFO_1=2021-9-16 15:48:41 into Mode Interface
+INFO_2=2021-9-16 15:51:27 into Mode Interface
+INFO_3=2021-9-16 15:55:0 into Mode Interface
+
+[setup]
+total=3
