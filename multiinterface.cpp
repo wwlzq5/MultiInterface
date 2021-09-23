@@ -356,17 +356,17 @@ void MultiInterface::onServerDataReady()
 	if(((MyStruct*)buffer.data())->nState == SENDDATA)
 	{
 		nCountLock.lock();
-		if(((MyStruct*)buffer.data())->nUnit = LEADING)
+		if(((MyStruct*)buffer.data())->nUnit == LEADING)
 		{
-			Logfile->write("1 get data",CheckLog);
+			//Logfile->write("1 get data",CheckLog);
 			nDataCount[0].push_back(buffer);
-		}else if(((MyStruct*)buffer.data())->nUnit = CLAMPING)
+		}else if(((MyStruct*)buffer.data())->nUnit == CLAMPING)
 		{
-			Logfile->write("2 get data",CheckLog);
+			//Logfile->write("2 get data",CheckLog);
 			nDataCount[1].push_back(buffer);
-		}else if(((MyStruct*)buffer.data())->nUnit = BACKING)
+		}else if(((MyStruct*)buffer.data())->nUnit == BACKING)
 		{
-			Logfile->write("3 get data",CheckLog);
+			//Logfile->write("3 get data",CheckLog);
 			nDataCount[2].push_back(buffer);
 		}
 		nCountLock.unlock();
@@ -390,6 +390,7 @@ void MultiInterface::onServerDataReady()
 	}else if(((MyStruct*)buffer.data())->nState == ALERT)//接口卡和错误显示
 	{
 		nDataLock.lock();
+		//Logfile->write("get alert data",CheckLog);
 		nDataList.push_back(buffer);
 		nDataLock.unlock();
 	}else if(((MyStruct*)buffer.data())->nState == SEVERS)//从第四块接口卡获取过检总数和踢废总数
@@ -522,6 +523,7 @@ void MultiInterface::CalculateData(QByteArray buffer)
 		if(nUnit ==1)//报警标志位
 		{
 			int nPlcTypeid = nSaveDataAddress[23];
+			//Logfile->write(QString("nplc = %1").arg(nPlcTypeid),CheckLog);
 			if(nPlcTypeid == -1)
 			{
 				emit sianal_WarnMessage(nPlcTypeid,NULL);

@@ -56,7 +56,7 @@ void IOCardClass::setEditValue(int* test,QString FailName)
 	ui.lineEdit_14->setText(QString::number(test[13]));
 	ui.lineEdit_15->setText(QString::number(test[14]));
 	ui.lineEdit_16->setText(QString::number(test[15]));
-	if(test[22])
+	//if(test[22])
 	{
 		if(ifSHOW)
 		{
