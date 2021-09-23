@@ -249,5 +249,12 @@
     <CustomBuild Include="GeneratedFiles\ui_ProdectMode.h">
       <Filter>Generated Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="resource.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Resources\LOGO.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MultiInterface.rc" />
   </ItemGroup>
 </Project>

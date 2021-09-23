@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'ProdectMode.ui'
 **
-** Created: Sat Sep 18 14:37:12 2021
+** Created: Sat Sep 18 14:48:00 2021
 **      by: Qt User Interface Compiler version 4.8.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!

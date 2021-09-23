@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'widgetMode.h'
 **
-** Created: Sat Sep 18 14:37:51 2021
+** Created: Sat Sep 18 14:48:00 2021
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.2)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -31,20 +31,20 @@ static const uint qt_meta_data_widget_Mode[] = {
        1,       // signalCount
 
  // signals: signature, parameters, type, tag, flags
-      13,   12,   12,   12, 0x05,
+      15,   13,   12,   12, 0x05,
 
  // slots: signature, parameters, type, tag, flags
-      38,   12,   12,   12, 0x0a,
-      54,   12,   12,   12, 0x0a,
-      72,   12,   12,   12, 0x0a,
-      91,   12,   12,   12, 0x0a,
-     106,   12,   12,   12, 0x0a,
+      51,   12,   12,   12, 0x0a,
+      67,   12,   12,   12, 0x0a,
+      85,   12,   12,   12, 0x0a,
+     104,   12,   12,   12, 0x0a,
+     119,   12,   12,   12, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_widget_Mode[] = {
-    "widget_Mode\0\0signal_loadMode(QString)\0"
+    "widget_Mode\0\0,\0signal_ModeState(StateEnum,QString)\0"
     "slot_loadMode()\0slot_deleteMode()\0"
     "slot_showAddMode()\0slot_addMode()\0"
     "slots_ShowSelectImage(QModelIndex)\0"
@@ -56,7 +56,7 @@ void widget_Mode::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         Q_ASSERT(staticMetaObject.cast(_o));
         widget_Mode *_t = static_cast<widget_Mode *>(_o);
         switch (_id) {
-        case 0: _t->signal_loadMode((*reinterpret_cast< QString(*)>(_a[1]))); break;
+        case 0: _t->signal_ModeState((*reinterpret_cast< StateEnum(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
         case 1: _t->slot_loadMode(); break;
         case 2: _t->slot_deleteMode(); break;
         case 3: _t->slot_showAddMode(); break;
@@ -107,9 +107,9 @@ int widget_Mode::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 
 // SIGNAL 0
-void widget_Mode::signal_loadMode(QString _t1)
+void widget_Mode::signal_ModeState(StateEnum _t1, QString _t2)
 {
-    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 QT_END_MOC_NAMESPACE

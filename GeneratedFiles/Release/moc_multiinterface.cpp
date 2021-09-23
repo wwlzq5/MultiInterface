@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'multiinterface.h'
 **
-** Created: Sat Sep 18 14:37:51 2021
+** Created: Wed Sep 22 09:31:13 2021
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.2)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -35,24 +35,25 @@ static const uint qt_meta_data_MultiInterface[] = {
       50,   16,   15,   15, 0x05,
 
  // slots: signature, parameters, type, tag, flags
-      73,   15,   15,   15, 0x0a,
-      96,   15,   15,   15, 0x0a,
-     118,   15,   15,   15, 0x0a,
-     138,   15,   15,   15, 0x0a,
-     159,   16,   15,   15, 0x0a,
-     190,   15,   15,   15, 0x0a,
-     213,   15,   15,   15, 0x0a,
+      73,   16,   15,   15, 0x0a,
+     108,   15,   15,   15, 0x0a,
+     131,   15,   15,   15, 0x0a,
+     153,   15,   15,   15, 0x0a,
+     173,   15,   15,   15, 0x0a,
+     194,   16,   15,   15, 0x0a,
+     225,   15,   15,   15, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_MultiInterface[] = {
     "MultiInterface\0\0,\0sianal_WarnMessage(int,QString)\0"
-    "UpdateIOCard(int*,int)\0slots_clickAccont(int)\0"
-    "ServerNewConnection()\0onServerDataReady()\0"
-    "slots_ConnectState()\0"
+    "UpdateIOCard(int*,int)\0"
+    "slots_ModeState(StateEnum,QString)\0"
+    "slots_clickAccont(int)\0ServerNewConnection()\0"
+    "onServerDataReady()\0slots_ConnectState()\0"
     "slots_OnUpdateIOCard(int*,int)\0"
-    "slots_TimeLogin(QTime)\0slots_LoadMode(QString)\0"
+    "slots_TimeLogin(QTime)\0"
 };
 
 void MultiInterface::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -63,13 +64,13 @@ void MultiInterface::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         switch (_id) {
         case 0: _t->sianal_WarnMessage((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
         case 1: _t->UpdateIOCard((*reinterpret_cast< int*(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 2: _t->slots_clickAccont((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 3: _t->ServerNewConnection(); break;
-        case 4: _t->onServerDataReady(); break;
-        case 5: _t->slots_ConnectState(); break;
-        case 6: _t->slots_OnUpdateIOCard((*reinterpret_cast< int*(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 7: _t->slots_TimeLogin((*reinterpret_cast< QTime(*)>(_a[1]))); break;
-        case 8: _t->slots_LoadMode((*reinterpret_cast< QString(*)>(_a[1]))); break;
+        case 2: _t->slots_ModeState((*reinterpret_cast< StateEnum(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
+        case 3: _t->slots_clickAccont((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 4: _t->ServerNewConnection(); break;
+        case 5: _t->onServerDataReady(); break;
+        case 6: _t->slots_ConnectState(); break;
+        case 7: _t->slots_OnUpdateIOCard((*reinterpret_cast< int*(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 8: _t->slots_TimeLogin((*reinterpret_cast< QTime(*)>(_a[1]))); break;
         default: ;
         }
     }

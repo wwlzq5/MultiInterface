@@ -39,10 +39,10 @@ public:
 	void closeEvent(QCloseEvent *event);
 	void CalculateData(QByteArray);
 	void onServerConnected(QString IPAddress,bool nState);
-	void slots_SaveCountInfo(QVector<TemporaryData>);
+	void SaveCountInfo();
 	void mouseMoveEvent(QMouseEvent *event);
 	void mousePressEvent(QMouseEvent *event);
-	void SendBasicNet(StateEnum);
+	void SendBasicNet(StateEnum,QString);
 	void ChangeVncState(int);
 public:
 	int nSheetPage;
@@ -52,17 +52,20 @@ signals:
 	void sianal_WarnMessage(int,QString);
 	void UpdateIOCard(int*,int);
 public slots:
+	void slots_ModeState(StateEnum,QString);
 	void slots_clickAccont(int);
 	void ServerNewConnection();
 	void onServerDataReady();
 	void slots_ConnectState();
 	void slots_OnUpdateIOCard(int*,int);
 	void slots_TimeLogin(QTime);
-	void slots_LoadMode(QString);
+	//void slots_SaveCountInfo();
 public:
 	static DWORD WINAPI DataHanldThread( void *arg );
+	static DWORD WINAPI DataCountThread( void *arg );
 public:
 	QMutex nDataLock;
+	QMutex nCountLock;
 	QTimer* nConnectState;
 	QStringList m_PLCAlertType;
 	QVector<IpStruct> IPAddress;
@@ -79,6 +82,8 @@ public:
 	widget_Alert* nAlert;
 	widget_count* nWidgetCount;
 	widget_Mode* nWidgetMode;
+	QList<QByteArray> nDataCount[3];
+	MyErrorType nSendData[256];
 public:
 	int nAllCheckNum;
 	int nAllFailNum;

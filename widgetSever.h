@@ -6,7 +6,7 @@
 #include <windows.h>
 #include "Stool.h"
 #include <QCloseEvent>
-//#define VNCTEST
+#define VNCTEST
 #ifdef VNCTEST
 #using "E:\MultiInterface\x64\123\BADControl.dll"
 #using "E:\MultiInterface\x64\123\System.Windows.Forms.dll"
@@ -24,6 +24,7 @@ public:
 	Widget_Sever(QWidget *parent = 0,int temp =0);
 	~Widget_Sever();
 public:
+	void closeScreen();
 	void SetParam(int,int);
 protected:
 	void closeEvent(QCloseEvent *event);

@@ -26,7 +26,7 @@ Widget_Sever::Widget_Sever(QWidget *parent,int id)
 	{
 		setWindowTitle(tr("Anterior wall display"));
 		nTest->Name = "123";
-		nTest->HostAddress = "192.168.20.101";
+		nTest->HostAddress = "192.168.20.124";
 	}else if(id == 2)
 	{
 		setWindowTitle(tr("Clamping display"));
@@ -79,6 +79,14 @@ void Widget_Sever::closeEvent(QCloseEvent *e)
 	}
 	hide();
 	e->accept();
+}
+void Widget_Sever::closeScreen()
+{
+	BadControl^ nTest = GetImpObj(m_plmp);
+	if(nTest->IsControlConnected)
+	{
+		nTest->CloseConnection();
+	}
 }
 void Widget_Sever::SetParam(int width,int height)
 {

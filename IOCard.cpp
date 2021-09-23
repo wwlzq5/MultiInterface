@@ -56,29 +56,32 @@ void IOCardClass::setEditValue(int* test,QString FailName)
 	ui.lineEdit_14->setText(QString::number(test[13]));
 	ui.lineEdit_15->setText(QString::number(test[14]));
 	ui.lineEdit_16->setText(QString::number(test[15]));
-	if(ifSHOW)
+	if(test[22])
 	{
-		if(test[17] == 0)//正常颜色置绿
+		if(ifSHOW)
 		{
-			ui.label_Camera->setText("-");
-			ui.label_nFailType->setText(FailName);
-			ui.label_nFailType->setStyleSheet("color:green");//文本颜色
-			//ui.label_nFailType->setStyleSheet("background-color:green");//背景色
-		}else{//颜色置红
-			ui.label_Camera->setText(QString::number(test[16]));
-			ui.label_nFailType->setText(FailName);
-			ui.label_nFailType->setStyleSheet("color:red");//文本颜色
-			//ui.label_nFailType->setStyleSheet("background-color:red");//背景色
-			InsertTableList(test[16],FailName);
-		}
-	}else{
-		if(test[17] >0)//正常颜色置绿
-		{
-			ui.label_Camera->setText(QString::number(test[16]));
-			ui.label_nFailType->setText(FailName);
-			ui.label_nFailType->setStyleSheet("color:red");//文本颜色
-			//ui.label_nFailType->setStyleSheet("background-color:red");//背景色
-			InsertTableList(test[16],FailName);
+			if(test[17] == 0)//正常颜色置绿
+			{
+				ui.label_Camera->setText("-");
+				ui.label_nFailType->setText(FailName);
+				ui.label_nFailType->setStyleSheet("color:green");//文本颜色
+				//ui.label_nFailType->setStyleSheet("background-color:green");//背景色
+			}else{//颜色置红
+				ui.label_Camera->setText(QString::number(test[16]));
+				ui.label_nFailType->setText(FailName);
+				ui.label_nFailType->setStyleSheet("color:red");//文本颜色
+				//ui.label_nFailType->setStyleSheet("background-color:red");//背景色
+				InsertTableList(test[16],FailName);
+			}
+		}else{
+			if(test[17] >0)//正常颜色置绿
+			{
+				ui.label_Camera->setText(QString::number(test[16]));
+				ui.label_nFailType->setText(FailName);
+				ui.label_nFailType->setStyleSheet("color:red");//文本颜色
+				//ui.label_nFailType->setStyleSheet("background-color:red");//背景色
+				InsertTableList(test[16],FailName);
+			}
 		}
 	}
 }
@@ -113,4 +116,6 @@ void IOCardClass::slot_ClearTable()
 			item.clear();
 		}
 	}
+	int clear[24]={0};
+	setEditValue(clear,NULL);
 }

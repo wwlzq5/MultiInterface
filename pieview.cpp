@@ -38,12 +38,14 @@
 **
 ****************************************************************************/
 
-#include <math.h>
-#include <QtGui>
 
+#include <math.h>
 #ifndef M_PI
 #define M_PI 3.1415927
 #endif
+#pragma unmanaged
+#include <QtGui>
+#pragma managed
 
 #include "pieview.h"
 

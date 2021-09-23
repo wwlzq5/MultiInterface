@@ -7,7 +7,7 @@ widget_Mode::widget_Mode()
 }
 widget_Mode::~widget_Mode()
 {
-
+	close();
 }
 void widget_Mode::initSocket()
 {
@@ -23,6 +23,7 @@ void widget_Mode::initSocket()
 void widget_Mode::initConfig()
 {
 	setWindowTitle(tr("mode set"));
+	setWindowIcon(QIcon("./Resources/LOGO.png"));
 	nModelExcel = new QStandardItemModel();
 	nModelExcel->setColumnCount(3);
 	nModelExcel->setHeaderData(0,Qt::Horizontal,tr("id"));
@@ -93,6 +94,14 @@ void widget_Mode::slot_addMode()
 	MyModeList nTemp;
 	nTemp.sModeName = ui.lineEdit->text();
 	nTemp.sModeTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+	foreach (MyModeList vars, nModeList)
+	{
+		if(vars.sModeName == nTemp.sModeName)
+		{
+			QMessageBox::information(this,tr("Information"),tr("mode name repeat"));
+			return;
+		}
+	}
 	nModeList<<nTemp;
 
 	QStandardItem *item1 = new QStandardItem(QObject::tr("%1").arg(nModeList.count()+1));
@@ -112,11 +121,22 @@ void widget_Mode::slot_addMode()
 			item.clear();
 		}
 	}
+	emit signal_ModeState(SYSTEMMODEADD,nTemp.sModeName);
+	QMessageBox::information(this,tr("Information"),tr("add mode success"));
+	ui.label->setVisible(false);
+	ui.lineEdit->setVisible(false);
+	ui.pushButton_sure->setVisible(false);
 }
-void widget_Mode::slot_deleteMode()
+void widget_Mode::slot_deleteMode()//É¾³ýÄ£°å
 {
 	if(nListNo>=0)
 	{
+		if (QMessageBox::No == QMessageBox::question(this,tr("Exit"),tr("Are you sure to delete?"),QMessageBox::Yes | QMessageBox::No))	
+		{
+			return;
+		}
+
+		emit signal_ModeState(SYSTEMMODEDELTE,nModeList.at(nListNo).sModeName);
 		nModeList.removeAt(nListNo);
 		QList<QStandardItem*>  item = nModelExcel->takeRow(nListNo);
 		if (!item.isEmpty())
@@ -128,12 +148,13 @@ void widget_Mode::slot_deleteMode()
 		QMessageBox::information(this,tr("Information"),tr("please check a mode"));
 	}
 }
-void widget_Mode::slot_loadMode()
+void widget_Mode::slot_loadMode()//¼ÓÔØÄ£°å
 {
 	if(nListNo>=0)
 	{
 		setWindowTitle(tr("current mode")+": "+nModeList.at(nListNo).sModeName);
-		emit signal_loadMode(nModeList.at(nListNo).sModeName);
+		emit signal_ModeState(SYSTEMMODESELECT,nModeList.at(nListNo).sModeName);
+		QMessageBox::information(this,tr("Information"),tr("check mode success"));
 	}else{
 		QMessageBox::information(this,tr("Information"),tr("please check a mode"));
 	}

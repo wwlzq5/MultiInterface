@@ -14,6 +14,12 @@ MultiInterface::MultiInterface(QWidget *parent)
 	{
 		m_sever[i] = new Widget_Sever(parent,i+1);
 	}
+	for(int i=0;i<256;i++)
+	{
+		nSendData[i].id = 0;
+		nSendData[i].nErrorArea = 0;
+		nSendData[i].nType = 0;
+	}
 	InitSocket();
 	InitConnect();
 	InitConfig();
@@ -31,6 +37,8 @@ void MultiInterface::closeEvent(QCloseEvent *event)
 	delete nUserWidget;
 	delete nWarning;
 	delete nAlert;
+	delete nWidgetMode;
+	nIOprence->close();
 }
 void MultiInterface::InitConfig()
 {
@@ -48,27 +56,28 @@ void MultiInterface::InitConfig()
 	Logfile = new CLogFile();
 	nOver  = true;
 	CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)DataHanldThread, this, 0, NULL );
+	CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)DataCountThread, this, 0, NULL );
 	nSqliteBase = new DataBase();
 	nSaveDataAddress = new int[HORIZONTAL24];
 	
 	IpStruct nIptemp;
 #ifdef TESTREMOTE
-	nIptemp.ipAddress="192.168.250.201";
+	nIptemp.ipAddress="192.168.20.101";
+	nIptemp.nstate = false;
+	IPAddress<<nIptemp;
+	nIptemp.ipAddress="192.168.20.124";
+	nIptemp.nstate = false;
+	IPAddress<<nIptemp;
+	nIptemp.ipAddress="192.168.20.116";
+	nIptemp.nstate = false;
+#else
+	nIptemp.ipAddress="192.168.250.201";//124
 	nIptemp.nstate = false;
 	IPAddress<<nIptemp;
 	nIptemp.ipAddress="192.168.250.202";
 	nIptemp.nstate = false;
 	IPAddress<<nIptemp;
 	nIptemp.ipAddress="192.168.250.203";
-	nIptemp.nstate = false;
-#else
-	nIptemp.ipAddress="192.168.20.101";//124
-	nIptemp.nstate = false;
-	IPAddress<<nIptemp;
-	nIptemp.ipAddress="192.168.250.202";
-	nIptemp.nstate = false;
-	IPAddress<<nIptemp;
-	nIptemp.ipAddress="192.168.20.116";
 	nIptemp.nstate = false;
 #endif
 	IPAddress<<nIptemp;
@@ -120,7 +129,7 @@ void MultiInterface::InitConnect()
 	nAlert = new widget_Alert();
 	
 	nWidgetMode = new widget_Mode();
-	connect(nWidgetMode,SIGNAL(signal_loadMode(QString)),this,SLOT(slots_LoadMode(QString)));
+	connect(nWidgetMode,SIGNAL(signal_ModeState(StateEnum,QString)),this,SLOT(slots_ModeState(StateEnum,QString)));
 
 	signal_mapper = new QSignalMapper(this);
 	connect(ui.pushButton_open1,SIGNAL(clicked()),signal_mapper,SLOT(map()));
@@ -140,40 +149,29 @@ void MultiInterface::InitConnect()
 	signal_mapper->setMapping(ui.pushButton_Mode,6);
 	connect(signal_mapper, SIGNAL(mapped(int)), this, SLOT(slots_clickAccont(int)));
 }
-
-void MultiInterface::slots_LoadMode(QString nModeName)
-{
-	QList<QTcpSocket *> m_tcps = m_temptcpServer->findChildren<QTcpSocket *>();
-	foreach (QTcpSocket *tcp, m_tcps)
-	{
-		MyStruct temp;
-		temp.nState = SYSTEMMODE;
-		temp.nTemp = nModeName;
-		tcp->write((char*)&temp,sizeof(MyStruct));
-	}
-}
 void MultiInterface::ChangeVncState(int nTest)
 {
-	SendBasicNet(IMAGE);
-	for(int i = 0;i<3;i++)
-	{
-		if(i != nTest)
-		{
-			m_sever[i]->close();
-		}
-	}
+	SendBasicNet(IMAGE,NULL);
+	m_sever[2]->close();
+	m_sever[1]->close();
+	m_sever[0]->close();
 	Sleep(1000);
 	m_sever[nTest]->SetParam(2500,1500);
 	m_sever[nTest]->show();
 }
-void MultiInterface::SendBasicNet(StateEnum nState)
+void MultiInterface::slots_ModeState(StateEnum nState,QString nTemp)
+{
+	SendBasicNet(nState,nTemp);
+}
+void MultiInterface::SendBasicNet(StateEnum nState,QString nTemp)
 {
 	QList<QTcpSocket *> m_tcps = m_temptcpServer->findChildren<QTcpSocket *>();
 	foreach (QTcpSocket *tcp, m_tcps)
 	{
-		MyStruct temp;
-		temp.nState = nState;
-		tcp->write((char*)&temp,sizeof(MyStruct));
+		MyStruct nData;
+		nData.nState = nState;
+		nData.nTemp = nTemp;
+		tcp->write((char*)&nData,sizeof(MyStruct));
 	}
 }
 void MultiInterface::slots_clickAccont(int nTest)
@@ -193,18 +191,25 @@ void MultiInterface::slots_clickAccont(int nTest)
 		Logfile->write(tr("into Backing Interface"),OperationLog);
 		break;
 	case 3:
+		nIOprence->raise();
 		nIOprence->show();
 		Logfile->write(tr("into IOCard Interface"),OperationLog);
 		break;
 	case 4:
+		nAlert->raise();
 		nAlert->show();
 		Logfile->write(tr("into Alert Interface"),OperationLog);
 		break;
 	case 5:
-		SendBasicNet(CLEAR);
+		for(int i=0;i<3;i++)
+		{
+			nDataCount[i].clear();
+		}
+		SendBasicNet(CLEAR,NULL);
 		Logfile->write(tr("into Clear Interface"),OperationLog);
 		break;
 	case 6:
+		nWidgetMode->raise();
 		nWidgetMode->show();
 		Logfile->write(tr("into Mode Interface"),OperationLog);
 		break;
@@ -239,34 +244,6 @@ void MultiInterface::slots_ConnectState()
 			}
 		}
 	}
-	//TemporaryData temp={0};
-	//QVector<TemporaryData> nData;
-	//nData<<temp<<temp<<temp;
-	//QTime nTime = QTime::currentTime();
-	//if((nTime.minute()==30||nTime.minute()==0)&&(nTime.second()<=20&&nTime.second()>10))//自动存储数据到报表中
-	//{
-	//	QList<QTcpSocket *> m_tcps = m_temptcpServer->findChildren<QTcpSocket *>();
-	//	foreach (QTcpSocket *tcp, m_tcps)
-	//	{
-	//		MyStruct temp;
-	//		temp.nState = SEVERS;
-	//		tcp->write((char*)&temp,sizeof(MyStruct));
-	//	}
-	//	for(int i=0;i<3;i++)
-	//	{
-	//		QList<SeleteData> m_temp = nSqliteBase->queryAll(QDateTime::currentDateTime().addSecs(-30*60).toString("yyMMddhhmmss"),QDateTime::currentDateTime().toString("yyMMddhhmmss"),i);
-	//		for(int j=0;j<m_temp.count();j++)
-	//		{
-	//			for(int k =0;k<30;k++)
-	//			{
-	//				nData[i].nTypeCount[k][m_temp[j].nType] += m_temp[j].nTypeCount[k];
-	//			}
-	//			nData[i].nCameraTypeCount[m_temp[j].nType] += m_temp[j].nCameraTypeCount;
-	//		}
-	//	}
-	//	//导入报表
-	//	slots_SaveCountInfo(nData);
-	//}
 	//没人操作锁屏
 	time(&n_EndTime);
 	if(difftime(n_StartTime,n_EndTime)> 5*60)
@@ -274,9 +251,96 @@ void MultiInterface::slots_ConnectState()
 		nUserWidget->ShowInterfance();
 	}
 }
-void MultiInterface::slots_SaveCountInfo(QVector<TemporaryData> nData)
+void MultiInterface::SaveCountInfo()
 {
-	
+	bool bIsEmptyFile = false;
+	QString strFileName;
+	strFileName = "./CountInfo/HalfCount/";
+	QDir *temp = new QDir;
+	bool exist = temp->exists(strFileName);
+	if(!exist)
+	{
+		bool ok = temp->mkdir(strFileName);
+	}
+	QDate date = QDate::currentDate();
+	strFileName = strFileName +	date.toString(Qt::ISODate) + ".txt";
+	if(!QFile::exists(strFileName))
+	{
+		QFile createFile(strFileName);
+		if(!createFile.open(QFile::WriteOnly | QIODevice::Text))
+		{
+			return;
+		}
+		bIsEmptyFile = true;
+		createFile.close();
+	}
+	QFile readFile(strFileName);
+	if (!readFile.open(QFile::Append | QIODevice::Text))
+	{
+		return;
+	}
+	QFile writeFile(strFileName);
+	//读入流和写入流
+	QTextStream writeStream(&writeFile);
+	if(true)
+	{
+		if (!bIsEmptyFile)
+		{
+			writeStream<<"\n";
+		}
+
+		QTime time = QTime::currentTime();
+		writeStream<<QString(tr("Time:  %1:%2:%3")).arg(time.hour()).arg(time.minute()).arg(time.second())<<"\t";
+		writeStream<<QString(tr("Product Number:  %1")).arg(nAllCheckNum)<<"\t";
+		writeStream<<QString(tr("Reject Number:  %1")).arg(nAllFailNum)<<"\t";
+		double dFailurRate=0.0;
+		if (0 != nAllCheckNum)
+		{
+			dFailurRate = 1.0*nAllFailNum/nAllCheckNum*100;
+		}
+		writeStream<<QString(tr("Reject Rate:  %1%")).arg(dFailurRate)<<"\n";
+
+		writeStream<<"\n";
+		writeStream<<tr("The statistical results")<<"\t\t";
+		writeStream<<tr("Count")<<"\t";
+
+		writeStream<<"\n";
+		int iShownCount[50]={0};
+		for(int i=0;i<256;i++)
+		{
+			if(nSendData[i].nType != 0)
+			{
+				iShownCount[nSendData[i].nType]++;
+			}
+		}
+		for (int j = 1;j<nAlert->nErrorType.count();j++)
+		{
+			if (0 != iShownCount[j])
+			{
+				QString tempString = nAlert->nErrorType.at(j);
+				writeStream<<tempString;
+				if (tempString.length()<=4)
+				{
+					writeStream<<"\t"<<"\t";
+				}
+				else
+				{
+					writeStream<<"\t";
+				}
+				writeStream<<QString::number(iShownCount[j])<<"\t";
+				writeStream<<"\n";
+			}
+		}
+		writeStream<<"\n";
+	}
+	if (!writeFile.open(QFile::Append | QIODevice::Text))
+	{
+		return;
+	}
+	writeStream.flush();//写入流到文件
+	writeFile.close();
+	delete temp;
+	return;
 }
 void MultiInterface::ServerNewConnection()
 {
@@ -289,14 +353,23 @@ void MultiInterface::onServerDataReady()
 	QTcpSocket* m_tcpSocket = dynamic_cast<QTcpSocket*>(sender());
 	QByteArray buffer = m_tcpSocket->readAll();
 	
-	if (((MyStruct*)buffer.data())->nState == SENDDATA)
+	if(((MyStruct*)buffer.data())->nState == SENDDATA)
 	{
-		if(buffer.length() == sizeof(MyStruct)+((MyStruct*)buffer.data())->nCount*HORIZONTAL24 || buffer.length() == sizeof(MyStruct)+((MyStruct*)buffer.data())->nCount*HORIZONTAL4)
+		nCountLock.lock();
+		if(((MyStruct*)buffer.data())->nUnit = LEADING)
 		{
-			nDataLock.lock();
-			nDataList.push_back(buffer);
-			nDataLock.unlock();
+			Logfile->write("1 get data",CheckLog);
+			nDataCount[0].push_back(buffer);
+		}else if(((MyStruct*)buffer.data())->nUnit = CLAMPING)
+		{
+			Logfile->write("2 get data",CheckLog);
+			nDataCount[1].push_back(buffer);
+		}else if(((MyStruct*)buffer.data())->nUnit = BACKING)
+		{
+			Logfile->write("3 get data",CheckLog);
+			nDataCount[2].push_back(buffer);
 		}
+		nCountLock.unlock();
 	}else if(((MyStruct*)buffer.data())->nState == CONNECT)//心跳包，用于判断是否掉线
 	{
 		QTime nTime =  QTime::currentTime();
@@ -316,35 +389,40 @@ void MultiInterface::onServerDataReady()
 		time(&n_StartTime);
 	}else if(((MyStruct*)buffer.data())->nState == ALERT)//接口卡和错误显示
 	{
-		if(buffer.length() == sizeof(MyStruct)+HORIZONTAL24)//12路输出信号+4路补充信息+错误缺陷
-		{
-			nDataLock.lock();
-			nDataList.push_back(buffer);
-			nDataLock.unlock();
-		}
+		nDataLock.lock();
+		nDataList.push_back(buffer);
+		nDataLock.unlock();
 	}else if(((MyStruct*)buffer.data())->nState == SEVERS)//从第四块接口卡获取过检总数和踢废总数
 	{
-		nAllCheckNum = ((MyStruct*)buffer.data())->nCount;
-		nAllFailNum = ((MyStruct*)buffer.data())->nFail;
+		/*if(((MyStruct*)buffer.data())->nUnit = CLAMPING)
+		{
+		char* t_ptr = buffer.data();
+		t_ptr+=sizeof(MyStruct);
+		}*/
+		//nAllCheckNum = ((MyStruct*)buffer.data())->nCount;
+		//nAllFailNum = ((MyStruct*)buffer.data())->nFail;
 	}else if(((MyStruct*)buffer.data())->nState == NLEADING)// 切换到前端界面
 	{
 		if(nSheetPage != NLEADING)
 		{
-			slots_clickAccont(0);
+			Sleep(1000);
+			ChangeVncState(0);
 			nSheetPage = NLEADING;
 		}
 	}else if(((MyStruct*)buffer.data())->nState == NCLAMPING)
 	{
 		if(nSheetPage != NCLAMPING)
 		{
-			slots_clickAccont(1);
+			Sleep(1000);
+			ChangeVncState(1);
 			nSheetPage = NCLAMPING;
 		}
 	}else if(((MyStruct*)buffer.data())->nState == NBACKING)
 	{
 		if(nSheetPage != NBACKING)
 		{
-			slots_clickAccont(2);
+			Sleep(1000);
+			ChangeVncState(2);
 			nSheetPage = NBACKING;
 		}
 	}else if(((MyStruct*)buffer.data())->nState == MAININTERFACE)
@@ -353,6 +431,66 @@ void MultiInterface::onServerDataReady()
 		m_sever[1]->close();
 		m_sever[0]->close();
 	}
+}
+DWORD WINAPI MultiInterface::DataCountThread( void *arg )
+{
+	MultiInterface* pThis = ( MultiInterface* )arg;
+	MyErrorType nErrorFristData[256];
+	MyErrorType nErrorClampData[256];
+	MyErrorType nErrorBACKData[256];
+	QByteArray buffer[3];
+	char* ptr[3];
+	while (pThis->nOver)
+	{
+		pThis->nCountLock.lock();
+		if(pThis->nDataCount[0].count()>0 && pThis->nDataCount[1].count()>0 && pThis->nDataCount[2].count()>0)
+		{
+			for(int i=0;i<3;i++)
+			{
+				buffer[i] = pThis->nDataCount[i].first();
+				pThis->nDataCount[i].removeFirst();
+				ptr[i] = buffer[i].data();
+				ptr[i] += sizeof(MyStruct);
+			}
+			pThis->nCountLock.unlock();
+			pThis->Logfile->write("fenxi data",CheckLog);
+			//处理数据
+			memcpy(&nErrorFristData,ptr[0],sizeof(MyErrorType)*256);
+			memcpy(&nErrorClampData,ptr[1],sizeof(MyErrorType)*256);
+			memcpy(&nErrorBACKData,ptr[2],sizeof(MyErrorType)*256);
+
+			for(int i=0;i<256;i++) // 通过循环所有综合数据保存在 nErrorFristData中
+			{
+				if(nErrorFristData[i].nType != 0 || nErrorClampData[i].nType != 0 || nErrorBACKData[i].nType != 0)//综合有缺陷，计数加1
+				{
+					pThis->nAllFailNum++;
+					//THREE_MAX(nErrorFristData[i].nErrorArea,nErrorClampData[i].nErrorArea,nErrorBACKData[i].nErrorArea);
+					if(nErrorFristData[i].nErrorArea <= nErrorClampData[i].nErrorArea && nErrorClampData[i].nErrorArea >= nErrorBACKData[i].nErrorArea)
+					{
+						pThis->nSendData[i] = nErrorClampData[i];
+					}else if(nErrorFristData[i].nErrorArea <= nErrorBACKData[i].nErrorArea && nErrorClampData[i].nErrorArea <= nErrorBACKData[i].nErrorArea)
+					{
+						pThis->nSendData[i] = nErrorBACKData[i];
+					}else if(nErrorFristData[i].nErrorArea >= nErrorClampData[i].nErrorArea && nErrorFristData[i].nErrorArea >= nErrorBACKData[i].nErrorArea)
+					{
+						pThis->nSendData[i] = nErrorFristData[i];
+					}
+				}
+			}
+			pThis->SaveCountInfo();
+		}else{
+			for(int i=0;i<3;i++)
+			{
+				if(pThis->nDataCount[i].count()>500)
+				{
+					pThis->nDataCount[i].pop_front();
+				}
+			}
+			pThis->nCountLock.unlock();
+			Sleep(20);
+		}
+	}
+	return true;
 }
 DWORD WINAPI MultiInterface::DataHanldThread( void *arg )
 {
@@ -375,33 +513,8 @@ DWORD WINAPI MultiInterface::DataHanldThread( void *arg )
 void MultiInterface::CalculateData(QByteArray buffer)
 {
 	char* t_ptr = buffer.data();
-	int nCameraUnit = nSqliteBase->nCountCamera[((MyStruct*)t_ptr)->nUnit];
-	int nCount = ((MyStruct*)t_ptr)->nCount;
-	int nFail = ((MyStruct*)t_ptr)->nFail;
 	int nUnit = ((MyStruct*)t_ptr)->nUnit;
-	if(((MyStruct*)t_ptr)->nState == SENDDATA)
-	{
-		/*TemporaryData nTemp={0};
-		t_ptr+=sizeof(MyStruct);
-		for(int i = 0 ; i < nCount; i++)
-		{
-		memcpy(nSaveDataAddress,t_ptr,sizeof(int)*nCameraUnit);
-		for(int j = 0 ; j < nCameraUnit; j++)
-		{
-		int FailType = nSaveDataAddress[j];
-		if(FailType > 0 && FailType < 50)
-		{
-		nTemp.nTypeCount[j][FailType]++;
-		nTemp.nCameraTypeCount[FailType]++;
-
-		}
-		}
-		t_ptr += sizeof(int)*nCameraUnit;
-		}
-		nTemp.nAllCount = nCount;
-		nTemp.nFailCount = nFail;
-		nSqliteBase->insert(QDateTime::currentDateTime().toString("yyMMddhhmmss"),nTemp,nUnit);*/
-	}else if(((MyStruct*)t_ptr)->nState == ALERT)
+	if(((MyStruct*)t_ptr)->nState == ALERT)
 	{
 		memcpy(nSaveDataAddress,t_ptr+sizeof(MyStruct),HORIZONTAL24);
 		//发送信号界面UI显示
@@ -426,6 +539,17 @@ void MultiInterface::onServerConnected(QString IPAddress,bool nState)
 {
 	
 #ifdef TESTREMOTE
+	if(IPAddress == "192.168.20.101")
+	{
+		ui.checkBox->setChecked(nState);
+	}else if(IPAddress == "192.168.20.116")
+	{
+		ui.checkBox_2->setChecked(nState);
+	}else if(IPAddress == "192.168.20.124")
+	{
+		ui.checkBox_3->setChecked(nState);
+	}
+#else
 	if(IPAddress == "192.168.250.201")
 	{
 		ui.checkBox->setChecked(nState);
@@ -433,17 +557,6 @@ void MultiInterface::onServerConnected(QString IPAddress,bool nState)
 	{
 		ui.checkBox_2->setChecked(nState);
 	}else if(IPAddress == "192.168.250.203")
-	{
-		ui.checkBox_3->setChecked(nState);
-	}
-#else
-	if(IPAddress == "192.168.20.101")
-	{
-		ui.checkBox->setChecked(nState);
-	}else if(IPAddress == "192.168.250.202")
-	{
-		ui.checkBox_2->setChecked(nState);
-	}else if(IPAddress == "192.168.20.116")
 	{
 		ui.checkBox_3->setChecked(nState);
 	}

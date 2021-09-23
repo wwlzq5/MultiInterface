@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'widgetSever.h'
 **
-** Created: Sat Sep 18 14:37:51 2021
+** Created: Sat Sep 18 17:54:39 2021
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.2)
 **
 ** WARNING! All changes made in this file will be lost!

@@ -7,6 +7,7 @@
 #include <QTime>
 #include <QList>
 #include <QMessageBox>
+#include "Stool.h"
 struct MyModeList
 {
 	QString sModeName;
@@ -24,7 +25,7 @@ public:
 	void initSocket();
 	void closeEvent(QCloseEvent *event);
 signals:
-	void signal_loadMode(QString);
+	void signal_ModeState(StateEnum,QString);
 public slots:
 	void slot_loadMode();
 	void slot_deleteMode();

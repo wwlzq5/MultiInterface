@@ -16,7 +16,9 @@ enum StateEnum
 	NCLAMPING,
 	NBACKING,
 	MAININTERFACE,
-	SYSTEMMODE
+	SYSTEMMODEADD,
+	SYSTEMMODESELECT,
+	SYSTEMMODEDELTE
 };
 enum UnitEnum
 {
@@ -29,6 +31,12 @@ struct IpStruct
 	QString ipAddress; //ip地址
 	int startTime; //时间，用于判断是否网络连接中断
 	bool nstate; //目前连接状态
+};
+struct MyErrorType
+{
+	int id;
+	int nType;
+	int nErrorArea;
 };
 struct MyStruct
 {
