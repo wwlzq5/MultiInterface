@@ -151,7 +151,7 @@ void MultiInterface::InitConnect()
 }
 void MultiInterface::ChangeVncState(int nTest)
 {
-	SendBasicNet(IMAGE,NULL);
+	SendBasicNet(IMAGE,"NULL");
 	m_sever[2]->close();
 	m_sever[1]->close();
 	m_sever[0]->close();
@@ -170,7 +170,10 @@ void MultiInterface::SendBasicNet(StateEnum nState,QString nTemp)
 	{
 		MyStruct nData;
 		nData.nState = nState;
-		nData.nTemp = nTemp;
+		if(nTemp!="NULL")
+		{
+			strcpy_s(nData.nTemp,nTemp.toLocal8Bit().data());
+		}
 		tcp->write((char*)&nData,sizeof(MyStruct));
 	}
 }
@@ -205,7 +208,7 @@ void MultiInterface::slots_clickAccont(int nTest)
 		{
 			nDataCount[i].clear();
 		}
-		SendBasicNet(CLEAR,NULL);
+		SendBasicNet(CLEAR,"NULL");
 		Logfile->write(tr("into Clear Interface"),OperationLog);
 		break;
 	case 6:

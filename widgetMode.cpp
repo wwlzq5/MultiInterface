@@ -89,6 +89,7 @@ void widget_Mode::slot_showAddMode()
 	ui.lineEdit->setVisible(true);
 	ui.pushButton_sure->setVisible(true);
 }
+#include <QDebug>
 void widget_Mode::slot_addMode()
 {
 	MyModeList nTemp;
