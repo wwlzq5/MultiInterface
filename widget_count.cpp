@@ -1,14 +1,13 @@
 #include "widget_count.h"
-#if 0
-#include "glasswaredetectsystem.h"
-extern GlasswareDetectSystem *pMainFrm;
-#endif
 
-widget_count::widget_count(int CameraNum,QWidget *parent)
+#include "multiinterface.h"
+extern MultiInterface *pMainFrm;
+
+
+widget_count::widget_count(QWidget *parent)
 	:QWidget(parent)
 {
 	ui.setupUi(this);
-	nCamNum = CameraNum;
 	init();
 }
 
@@ -32,7 +31,6 @@ void widget_count::init()
 	ui.widget_ShiftSet->setWidgetName(tr("Shift Set"));
 	ui.widget_HistotySearch->setWidgetName(tr("History Search"));
 	ui.widget_TimePie->setWidgetName(tr("Defect Count - Every hour or half an hour"));
-	ui.widget_HistoryShift->setWidgetName(tr("History Search Shift Set"));
 	ui.widget_shiftSearch->setWidgetName(tr("Shift Selete"));
 	ui.widget_table->setWidgetName(tr("Search Table Type"));
 	ui.widget_ShiftPie->setWidgetName(tr("Detect Count - Shift"));
@@ -55,12 +53,13 @@ void widget_count::init()
 	ui.tableView_1->verticalHeader()->setVisible(false);					//隐藏行头
 	table1Model=new QStandardItemModel;
 	QStringList headerList;
-	headerList<<QObject::tr("Type");
-	headerList<<QObject::tr("Count");
-	for (int i=0;i<nCamNum;i++)
-	{
-		headerList <<QObject::tr("Camera%1").arg(i+1);
-	}
+	headerList<<tr("Type");
+	headerList<<tr("Count");
+	headerList<<tr("Front");
+	headerList<<tr("Clamp");
+	headerList<<tr("Rear");
+
+
 	table1Model->setHorizontalHeaderLabels(headerList);
 	ui.tableView_1->setModel(table1Model);
 	ui.tableView_1->setColumnWidth(0,120);									//设置第一列列宽
@@ -75,10 +74,10 @@ void widget_count::init()
 	headerList<<tr("AllCheck");
 	headerList<<tr("AllReject");
 	headerList<<tr("Reject Rate");
-	for (int i = 1;i <= nCamNum;i++)
-	{
-		headerList <<QObject::tr("Camera%1").arg(i);
-	}
+	headerList<<tr("Front");
+	headerList<<tr("Clamp");
+	headerList<<tr("Rear");
+	
 	table2Model->setHorizontalHeaderLabels(headerList);
 	ui.tableView_2->setModel(table2Model);
 	ui.tableView_2->setColumnWidth(0,120);									//设置第一列列宽
@@ -136,18 +135,32 @@ void widget_count::init()
 	ui.CustomPlot->setBackground(QBrush(gradient));
 
 	//设置countInfo默认值
-	slots_updateCountInfo(0,0,1);
+	slot_saveRecordCancel_clicked();
+;	slot_shiftCancel_clicked();
 
 	connect(buttonTurn,SIGNAL(clicked()),this,SLOT(slots_turnPage()));
+	connect(ui.pushButton_saveRecordOK,SIGNAL(clicked()),this,SLOT(slot_saveRecordOK_clicked()));
+	connect(ui.pushButton_saveRecordCancel,SIGNAL(clicked()),this,SLOT(slot_saveRecordCancel_clicked()));
+	connect(ui.pushButton_shiftOK,SIGNAL(clicked()),this,SLOT(slot_shiftOK_clicked()));
+	connect(ui.pushButton_shiftCancel,SIGNAL(clicked()),this,SLOT(slot_shiftCancel_clicked()));
+	connect(ui.Btn_HistorySearch,SIGNAL(clicked()),this,SLOT(slot_HistorySearch_clicked()));
+	connect(ui.tableView_2, SIGNAL(clicked(QModelIndex)), this, SLOT(slots_ShowPie(QModelIndex)));
+	connect(ui.pushButton_openRecord,SIGNAL(clicked()),this,SLOT(slot_OpenRecord_clicked()));
+	connect(ui.pushButton_deleteRecord,SIGNAL(clicked()),this,SLOT(slot_DeleteRecord_clicked()));
+	connect(ui.Btn_OpenExcel,SIGNAL(clicked()),this,SLOT(slot_OpenExcel_clicked()));
+	connect(ui.pushButton_Search,SIGNAL(clicked()),this,SLOT(slot_SearchShift_clicked()));
 
+	ExportThread=new ExportExcelThread(this);
 
+/*
 	QList<cErrorTypeCountInfo > pInfos;
 	for (int i=0;i<10;i++)
 	{
 		cErrorTypeCountInfo info;
 		info.iErrorTxt = QString::number(i);
-		info.iCamErrorNum[0]=i;
-		info.iCamErrorNum[1]=i;
+		info.iFrontCount=i;
+		info.iClampCount=i;
+		info.iRearCount=i;
 		info.iCheckCount=100;
 		info.iErrorFailCount=i+1;
 		info.iFailCount=55;
@@ -165,6 +178,88 @@ void widget_count::init()
 	}
 	slots_UpdateTable2(pCountdates);
 	slots_ShowShiftIamge();
+*/
+}
+
+DWORD widget_count::GetProcessIdFromName(const char*processName)    
+{
+	PROCESSENTRY32 pe;
+	DWORD id = 0;
+
+	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0);
+	pe.dwSize = sizeof(PROCESSENTRY32);
+	if( !Process32First(hSnapshot,&pe) )
+		return 0;
+	char pname[300];
+	do
+	{
+		pe.dwSize = sizeof(PROCESSENTRY32);
+		if( Process32Next(hSnapshot,&pe)==FALSE )
+			break;
+		//把WCHAR*类型转换为const char*类型
+		sprintf_s(pname,"%ws",pe.szExeFile,260);
+		//比较两个字符串，如果找到了要找的进程
+		if(strcmp(pname,processName) == 0)
+		{
+			id = pe.th32ProcessID;
+			break;
+		}
+
+	} while(1);
+	CloseHandle(hSnapshot);
+	return id;
+}
+
+QTime widget_count::initTime(QTime pTime)
+{
+	int phour = pTime.hour();
+	int pminute = pTime.minute();
+	if(pMainFrm->SysConfigInfo.iSaveRecordInterval == 60)
+	{
+		if (pminute >0)
+		{
+			if (phour != 23)
+			{
+				phour += 1;
+			}
+			pminute = 0;
+		}
+	}
+	else
+	{
+		if (pminute > 0 && pminute < 30)
+		{
+			pminute = 30;
+		}
+		else if ( pminute > 30 )
+		{
+			if (phour != 23)
+			{
+				phour += 1;
+				pminute = 0;
+			}	
+			else
+			{
+				pminute = 30;
+			}
+		}
+	}
+	QString timeStr = QString("%1:%2").arg(phour).arg(pminute);
+
+	return QTime::fromString(timeStr,"h:m");
+}
+
+void widget_count::openInNotePad(QString str)
+{
+	DWORD pid = GetProcessIdFromName("notepad.exe");
+	//获取进程的最大权限
+	if(pid!=0)
+	{
+		HANDLE token = OpenProcess(PROCESS_ALL_ACCESS,FALSE,pid);
+		//关闭进程
+		TerminateProcess(token, 0);
+	}
+	ShellExecuteA(NULL,"open",(LPCSTR)str.toLocal8Bit(),NULL,NULL,SW_SHOW);
 }
 
 void widget_count::slots_turnPage()
@@ -173,6 +268,218 @@ void widget_count::slots_turnPage()
 		ui.stackedWidget->setCurrentIndex(1);
 	else
 		ui.stackedWidget->setCurrentIndex(0);
+}
+
+void widget_count::slot_saveRecordOK_clicked()
+{
+	int iSaveRecordInterval = 30;
+	bool isSaveRecord = ui.checkBox_saveRecord->isChecked();
+	if (ui.radioButton_30minite->isChecked())
+	{
+		iSaveRecordInterval = 30;
+	}
+	else
+	{
+		iSaveRecordInterval = 60;
+	}
+
+	QSettings SystemConfigSet(pMainFrm->AppPaths.configPath,QSettings::IniFormat);
+	SystemConfigSet.setIniCodec(QTextCodec::codecForName("GBK"));
+	SystemConfigSet.setValue("System/iSaveRecordInterval",iSaveRecordInterval);
+	SystemConfigSet.setValue("System/isSaveRecord",isSaveRecord);
+
+	emit updateRecordSet();
+}
+
+void widget_count::slot_saveRecordCancel_clicked()
+{
+	QSettings SystemConfigSet(pMainFrm->AppPaths.configPath,QSettings::IniFormat);
+	SystemConfigSet.setIniCodec(QTextCodec::codecForName("GBK"));
+	int iSaveRecordInterval	=	SystemConfigSet.value("System/iSaveRecordInterval",30).toInt();
+	bool isSaveRecord		=	SystemConfigSet.value("System/isSaveRecord",true).toBool();
+
+	ui.checkBox_saveRecord->setChecked(isSaveRecord);
+	if (iSaveRecordInterval == 30)
+	{
+		ui.radioButton_30minite->setChecked(true);
+	}
+	else
+	{
+		ui.radioButton_60minite->setChecked(true);
+	}
+}
+
+void widget_count::slot_shiftOK_clicked()
+{
+	QTime shift1Time = ui.timeEdit_shift1->time();
+	QTime shift2Time = ui.timeEdit_shift2->time();
+	QTime shift3Time = ui.timeEdit_shift3->time();
+	bool isAutoClear = ui.checkBox_AutoSetZero->isChecked();
+
+	QVector<QTime> times;
+	times<< initTime(shift1Time) << initTime(shift2Time) << initTime(shift3Time) ;
+	qSort(times);
+
+	QSettings SystemConfigSet(pMainFrm->AppPaths.configPath,QSettings::IniFormat);
+	SystemConfigSet.setIniCodec(QTextCodec::codecForName("GBK"));
+	SystemConfigSet.setValue("System/shift1Time",times[0].toString("hhmmss"));
+	SystemConfigSet.setValue("System/shift2Time",times[1].toString("hhmmss"));
+	SystemConfigSet.setValue("System/shift3Time",times[2].toString("hhmmss"));
+	SystemConfigSet.setValue("System/isAutoClear",isAutoClear);
+
+	emit updateShiftSet();
+
+	slot_shiftCancel_clicked();
+}
+
+void widget_count::slot_shiftCancel_clicked()
+{
+	QSettings SystemConfigSet(pMainFrm->AppPaths.configPath,QSettings::IniFormat);
+	SystemConfigSet.setIniCodec(QTextCodec::codecForName("GBK"));
+	QTime shift1Time = QTime::fromString(SystemConfigSet.value("System/shift1Time","060000").toString(),"hhmmss");
+	QTime shift2Time = QTime::fromString(SystemConfigSet.value("System/shift2Time","150000").toString(),"hhmmss");
+	QTime shift3Time = QTime::fromString(SystemConfigSet.value("System/shift3Time","230000").toString(),"hhmmss");
+	bool isAutoClear = SystemConfigSet.value("System/isAutoClear",true).toBool();
+
+	ui.timeEdit_shift1->setTime(shift1Time);
+	ui.timeEdit_shift2->setTime(shift2Time);
+	ui.timeEdit_shift3->setTime(shift3Time);
+	ui.checkBox_AutoSetZero->setChecked(isAutoClear);
+}
+
+void widget_count::slot_HistorySearch_clicked()
+{
+	QDate dateSelecte = ui.calendarWidget_1->selectedDate();
+	QString temp = dateSelecte.toString(Qt::ISODate);
+	temp.replace("-", "");
+
+	QList<long long> tmpTimes;
+	QList<cErrorInfo> tmpInfos;
+
+	pMainFrm->m_Datebase->queryByDay(temp ,tmpTimes,tmpInfos);
+
+	slots_UpdateTable2(tmpTimes,tmpInfos);
+
+}
+
+void widget_count::slot_OpenRecord_clicked()
+{
+	QDate dateSelecte = ui.calendarWidget->selectedDate();
+	QString strFileName;
+	if(0==ui.comboBox->currentIndex())
+	{
+		strFileName = pMainFrm->AppPaths.AppPath+ "CountInfo/timeCount/" + dateSelecte.toString(Qt::ISODate) + ".txt";
+	}else{
+		strFileName = pMainFrm->AppPaths.AppPath + "CountInfo/shiftCount/" + dateSelecte.toString(Qt::ISODate) + ".txt";
+	}
+	if(!QFile::exists(strFileName))
+	{
+		QMessageBox::information(this,tr("Information"),tr("No record in select date!"));
+		return;
+	}
+	openInNotePad(strFileName);
+}
+
+void widget_count::slot_DeleteRecord_clicked()
+{
+	QDate dateSelecte = ui.calendarWidget->selectedDate();
+	QString strDirPath;
+	QString strFileName;
+	if(0==ui.comboBox->currentIndex())
+	{
+		strDirPath = pMainFrm->AppPaths.AppPath+ "CountInfo/timeCount/";
+		strFileName = pMainFrm->AppPaths.AppPath+ "CountInfo/timeCount/" + dateSelecte.toString(Qt::ISODate) + ".txt";
+	}else{
+		strDirPath = pMainFrm->AppPaths.AppPath+ "CountInfo/shiftCount/";
+		strFileName = pMainFrm->AppPaths.AppPath + "CountInfo/shiftCount/" + dateSelecte.toString(Qt::ISODate) + ".txt";
+	}
+	if(!QFile::exists(strFileName))
+	{
+		QMessageBox::information(this,tr("Information"),tr("No record in select date!"));
+		return;
+	}
+	QDir dir(strDirPath);
+	if (!dir.remove(strFileName))
+	{
+		QMessageBox::information(this,tr("Information"),tr("Deleting [%1] fail!").arg(strFileName));
+		return;
+	}
+
+}
+
+void widget_count::slot_OpenExcel_clicked()
+{
+	if (ExportThread->isRunning())
+	{
+		return;
+	}
+	
+	ExportThread->m_Date = ui.calendarWidget->selectedDate();
+	//ExportThread->InitShiftTime(pMainFrm->m_sSystemInfo.shift1,pMainFrm->m_sSystemInfo.shift2,pMainFrm->m_sSystemInfo.shift3);
+	ExportThread->start();
+	QMessageBox::information(NULL, QString::fromLocal8Bit("注意"), QString::fromLocal8Bit("保存excel时间较长请耐心等待约10秒左右"), QMessageBox::Yes, QMessageBox::Yes);
+}
+
+void widget_count::slot_SearchShift_clicked()
+{
+	QString startTime,endTime;
+	QDate dateSelecte = ui.calendarWidget_2->selectedDate();
+	QString temp = dateSelecte.toString(Qt::ISODate);
+	temp.replace("-", "");//20201028
+	QString shiftStr;
+	if (ui.radioButton_Shift1->isChecked())
+	{		
+		startTime = temp + pMainFrm->SysConfigInfo.shift1Time.toString("hhmm");
+		endTime = temp + pMainFrm->SysConfigInfo.shift2Time.toString("hhmm");
+		shiftStr=tr("shift1");
+	}
+	else if (ui.radioButton_Shift2->isChecked())
+	{
+		startTime = temp + pMainFrm->SysConfigInfo.shift2Time.toString("hhmm");
+		endTime = temp + pMainFrm->SysConfigInfo.shift3Time.toString("hhmm");
+		shiftStr=tr("shift2");
+	}
+	else if(ui.radioButton_Shift3->isChecked())
+	{
+		startTime = temp + pMainFrm->SysConfigInfo.shift3Time.toString("hhmm");
+		temp = dateSelecte.addDays(1).toString(Qt::ISODate).replace("-","");
+		endTime = temp + pMainFrm->SysConfigInfo.shift1Time.toString("hhmm");
+		shiftStr=tr("shift3");
+	}
+	else
+	{
+		startTime = temp + pMainFrm->SysConfigInfo.shift1Time.toString("hhmm");
+		temp = dateSelecte.addDays(1).toString(Qt::ISODate).replace("-","");
+		endTime = temp + pMainFrm->SysConfigInfo.shift1Time.toString("hhmm");
+		shiftStr=tr("AllShift");
+	}
+	QList<long long> tmpTimes;
+	QList<cErrorInfo> tmpInfos;
+	pMainFrm->m_Datebase->queryByShift(startTime,endTime,tmpTimes,tmpInfos);
+	if (ui.radioButton_ShiftAll->isChecked())
+	{
+		slots_ShowShiftIamge(tmpTimes,tmpInfos);
+	}
+	else
+	{
+		slots_ShowShiftIamge(startTime,endTime,tmpTimes,tmpInfos);
+	}
+	
+}
+
+void widget_count::slots_ShowPie(QModelIndex modelIndex)
+{
+	int iListNo = modelIndex.row();
+	QModelIndex index = table2Model->index(iListNo,0);
+	QString name = table2Model->data(index).toString();
+	QDateTime pDateTime=QDateTime::fromString(name,"yyyy-MM-dd hh:mm");
+	QString timeStr = pDateTime.toString("yyyyMMddhhmm");
+	long long tmpTime=0;
+	cErrorInfo tmpInfo;
+	pMainFrm->m_Datebase->queryByOnce(timeStr,tmpTime,tmpInfo);
+
+	ui.widget_TimePie->setWidgetName(tr("Defect Count - %1").arg(name));
+	slots_ShowPieImage1(tmpInfo);
 }
 
 void widget_count::slots_updateCountInfo(int total,int failNum,float modelRate)
@@ -194,7 +501,7 @@ void widget_count::slots_updateCountInfo(int total,int failNum,float modelRate)
 	}	
 }
 
-void widget_count::slots_UpdateTable1(QList<cErrorTypeCountInfo> pCountdates)
+void widget_count::slots_UpdateTable1(cErrorInfo pCountdates)
 {
 	while(table1Model->rowCount()>0 )
 	{
@@ -203,29 +510,29 @@ void widget_count::slots_UpdateTable1(QList<cErrorTypeCountInfo> pCountdates)
 		listItem.clear();
 	}
 	QList<QStandardItem*> items;
-	for (int i=0;i<pCountdates.count();i++)
+	for (int i=1;i<pMainFrm->m_ErrorTypeInfo.iErrorTypeCount;i++)
 	{
-		cErrorTypeCountInfo pInfo = pCountdates.at(i);
 		items.clear();
-		QStandardItem *item1 = new 
-#if 1
-			QStandardItem(pInfo.iErrorTxt);
-#else
-			QStandardItem(pMainFrm->m_sErrorInfo.m_vstrErrorType.at(pInfo.iErrorType));
-#endif
-		items<<item1;
-		QStandardItem *item2 = new QStandardItem(QString::number(pInfo.sum()));
-		items<<item2;
-		for (int j=0;j<nCamNum;j++)
+		int ErrorByType=pCountdates.GetErrorByTypeCount(i);
+		if (ErrorByType != 0)
 		{
-			QStandardItem *item3 = new QStandardItem(QString::number(pInfo.iCamErrorNum[j]));
+			QStandardItem *item1 = new QStandardItem(pMainFrm->m_ErrorTypeInfo.iErrorType[i]);
+			items<<item1;
+			QStandardItem *item2 = new QStandardItem(QString::number(ErrorByType));
+			items<<item2;
+			QStandardItem *item3 = new QStandardItem(QString::number(pCountdates.iFrontErrorByType[i]));
 			items<<item3;
+			QStandardItem *item4 = new QStandardItem(QString::number(pCountdates.iClampErrorByType[i]));
+			items<<item4;
+			QStandardItem *item5 = new QStandardItem(QString::number(pCountdates.iRearErrorByType[i]));
+			items<<item5;
+
+			table1Model->insertRow(table1Model->rowCount(),items);
 		}
-		table1Model->insertRow(table1Model->rowCount(),items);
 	}
 }
 
-void widget_count::slots_UpdateTable2(QList<cErrorCountbyTime> pCountdates)
+void widget_count::slots_UpdateTable2(QList<long long> pTimes,QList<cErrorInfo> pInfos)
 {
 	while(table2Model->rowCount()>0 )
 	{
@@ -235,84 +542,104 @@ void widget_count::slots_UpdateTable2(QList<cErrorCountbyTime> pCountdates)
 	}
 
 	QList<QStandardItem*> items;
-	for (int i=0;i<pCountdates.count();i++)
+	for (int i=0;i<pTimes.count();i++)
 	{
-		cErrorCountbyTime pInfo = pCountdates.at(i);
+		QDateTime pTime = QDateTime::fromString(QString::number(pTimes[i]),"yyyyMMddhhmm");
+		QString timeString= pTime.toString("yyyy-MM-dd hh:mm");
+
+		cErrorInfo pInfo = pInfos.at(i);
 		items.clear();
-		QStandardItem *item1 = new QStandardItem(pInfo.GetTimeStr());
+		QStandardItem *item1 = new QStandardItem(timeString);
 		items<<item1;
-		QStandardItem *item2 = new QStandardItem(QString::number(pInfo.iAllcount));
+		QStandardItem *item2 = new QStandardItem(QString::number(pInfo.iAllCount));
 		items<<item2;
-		QStandardItem *item3 = new QStandardItem(QString::number(pInfo.iErrorCount));
+		QStandardItem *item3 = new QStandardItem(QString::number(pInfo.GetFailCount()));
 		items<<item3;
-		QStandardItem *item4 = new QStandardItem(pInfo.GetFailRate());
+		QStandardItem *item4 = new QStandardItem(QString("%1%").arg(pInfo.GetFailRate()*100,2,'f',2));
 		items<<item4;
-		for (int j=0;j<nCamNum;j++)
-		{
-			QStandardItem *item5 = new QStandardItem(QString::number(pInfo.iCamErrorNum[j]));
-			items<<item5;
-		}
+		QStandardItem *item5 = new QStandardItem(QString::number(pInfo.GetFrontCount()));
+		items<<item5;
+		QStandardItem *item6 = new QStandardItem(QString::number(pInfo.GetClampCount()));
+		items<<item6;
+		QStandardItem *item7 = new QStandardItem(QString::number(pInfo.GetRearCount()));
+		items<<item7;
 		table2Model->insertRow(table2Model->rowCount(),items);
 	}
 }
 
-void widget_count::slots_UpdateTable2(cErrorCountbyTime pCountdate)
+void widget_count::slots_UpdateTable2(QString ptime ,cErrorInfo pCountdate)
 {
 	//cErrorCountbyTime pInfo = pCountdate;
 	QList<QStandardItem*> items;
-	QStandardItem *item1 = new QStandardItem(pCountdate.GetTimeStr());
+	QStandardItem *item1 = new QStandardItem(ptime);
 	items<<item1;
-	QStandardItem *item2 = new QStandardItem(QString::number(pCountdate.iAllcount));
+	QStandardItem *item2 = new QStandardItem(QString::number(pCountdate.iAllCount));
 	items<<item2;
-	QStandardItem *item3 = new QStandardItem(QString::number(pCountdate.iErrorCount));
+	QStandardItem *item3 = new QStandardItem(QString::number(pCountdate.GetFailCount()));
 	items<<item3;
-	QStandardItem *item4 = new QStandardItem(pCountdate.GetFailRate());
+	QStandardItem *item4 = new QStandardItem(QString("%1%").arg(pCountdate.GetFailRate()*100,2,'f',2));
 	items<<item4;
-	for (int j=0;j<nCamNum;j++)
-	{
-		QStandardItem *item5 = new QStandardItem(QString::number(pCountdate.iCamErrorNum[j]));
-		items<<item5;
-	}
+	QStandardItem *item5 = new QStandardItem(QString::number(pCountdate.GetFrontCount()));
+	items<<item5;
+	QStandardItem *item6 = new QStandardItem(QString::number(pCountdate.GetClampCount()));
+	items<<item6;
+	QStandardItem *item7 = new QStandardItem(QString::number(pCountdate.GetRearCount()));
+	items<<item7;
 	table2Model->insertRow(table2Model->rowCount(),items);
 }
 
-void widget_count::slots_ShowPieImage1(QList<cErrorTypeCountInfo> pCountdates)
+void widget_count::slots_ShowPieImage1(cErrorInfo pCountdates)
 {
-	if (pCountdates.isEmpty())
-	{
+	PieModel_1->removeRows(0,PieModel_1->rowCount(QModelIndex()),QModelIndex());
+	if (pCountdates.iAllCount == 0)
 		return;
-	}
 	QFont itemFont("微软雅黑",10);
 	itemFont.setBold(true);
-
-	PieModel_1->removeRows(0,PieModel_1->rowCount(QModelIndex()),QModelIndex());
-	int tempCount=pCountdates.count();
-	int ErrorAllfail=0;
-	for(int i = 0;i < tempCount;i++)
+	int tempCount=0;
+	QList<int> Types;
+	QList<int> Datas;
+	for (int i=0;i<50;i++)
 	{
-		ErrorAllfail += pCountdates.at(i).iErrorFailCount;
-	}
-	int m_failCount = pCountdates.at(0).iFailCount;
-	m_failCount = ErrorAllfail < m_failCount ? ErrorAllfail : m_failCount;
-	int m_AllCount = pCountdates.at(0).iCheckCount;
-	if (tempCount <=10)
-	{
-		int t_fail = 0;
-		for(int i = 0;i < tempCount;i++)
+		bool havedata = false;
+		if (pCountdates.iFrontErrorByType[i] != 0)
+			havedata = true;
+		if (pCountdates.iClampErrorByType[i] != 0)
+			havedata = true;
+		if (pCountdates.iRearErrorByType[i] != 0)
+			havedata = true;
+		if(havedata)
 		{
-			int t_data = 0 ;
-			if (i != (tempCount-1))
+			Types<<i;
+			Datas<<pCountdates.GetErrorByTypeCount(i);
+		}
+	}
+
+	for (int i=0;i<Types.count()-1;i++)
+	{
+		for(int j=0;j<Types.count()-1-i;j++)
+		{
+			if(Datas[j] < Datas[j+1])
 			{
-				t_data = pCountdates.at(i).iErrorFailCount;
-				t_fail += t_data;
+				int tmp=0;
+				tmp = Datas[j+1];
+				Datas[j+1] = Datas[j];
+				Datas[j] = tmp;
+
+				tmp = Types[j+1];
+				Types[j+1] = Types[j];
+				Types[j] = tmp;
+
 			}
-			else
-			{
-				t_data = m_failCount - t_fail ;
-			}
+		}	
+	}
+
+	if (Types.count() <=10)
+	{
+		for(int i = 0;i < Types.count();i++)
+		{
 			PieModel_1->insertRows(i, 1, QModelIndex());
-			PieModel_1->setData(PieModel_1->index(i, 0, QModelIndex()), pCountdates[i].iErrorTxt+":" + QString::number(t_data)+"("+QString::number((double)t_data/m_AllCount*100,'f',2)+"%)");
-			PieModel_1->setData(PieModel_1->index(i, 1, QModelIndex()), QString::number(t_data));
+			PieModel_1->setData(PieModel_1->index(i, 0, QModelIndex()), pMainFrm->m_ErrorTypeInfo.iErrorType[Types[i]]+":" + QString::number(Datas[i])+"("+QString::number((double)Datas[i] / pCountdates.iAllCount *100,'f',2)+"%)");
+			PieModel_1->setData(PieModel_1->index(i, 1, QModelIndex()), QString::number(Datas[i]));
 			PieModel_1->setData(PieModel_1->index(i, 0, QModelIndex()), PieItemcolors[i], Qt::DecorationRole);
 			PieModel_1->item(i,0)->setFont(itemFont);
 		}
@@ -322,22 +649,17 @@ void widget_count::slots_ShowPieImage1(QList<cErrorTypeCountInfo> pCountdates)
 		int t_fail = 0;
 		for(int i = 0;i < 9;i++)
 		{
-			int t_data = pCountdates.at(i).iErrorFailCount;
-			if (ErrorAllfail != 0)
-			{
-				t_data = m_failCount * t_data  / ErrorAllfail ;
-			}
-			t_fail += t_data;
+			t_fail += Datas[i];
 
 			PieModel_1->insertRows(i, 1, QModelIndex());
-			PieModel_1->setData(PieModel_1->index(i, 0, QModelIndex()), pCountdates[i].iErrorTxt+":" + QString::number(t_data)+"("+QString::number((double)t_data/m_AllCount*100,'f',2)+"%)");
-			PieModel_1->setData(PieModel_1->index(i, 1, QModelIndex()), QString::number(t_data));
+			PieModel_1->setData(PieModel_1->index(i, 0, QModelIndex()), pMainFrm->m_ErrorTypeInfo.iErrorType[Types[i]]+":" + QString::number(Datas[i])+"("+QString::number((double)Datas[i] / pCountdates.iAllCount *100,'f',2)+"%)");
+			PieModel_1->setData(PieModel_1->index(i, 1, QModelIndex()), QString::number(Datas[i]));
 			PieModel_1->setData(PieModel_1->index(i, 0, QModelIndex()), PieItemcolors[i], Qt::DecorationRole);
 			PieModel_1->item(i,0)->setFont(itemFont);
 		}
-		t_fail = m_failCount - t_fail ;
+		t_fail = pCountdates.GetFailCount() - t_fail ;
 		PieModel_1->insertRows(9, 1, QModelIndex());
-		PieModel_1->setData(PieModel_1->index(9, 0, QModelIndex()), tr("Other:") + QString::number(t_fail)+"("+QString::number((double)t_fail/m_AllCount*100,'f',2)+"%)");
+		PieModel_1->setData(PieModel_1->index(9, 0, QModelIndex()), tr("Other:") + QString::number(t_fail)+"("+QString::number((double)t_fail/pCountdates.iAllCount*100,'f',2)+"%)");
 		PieModel_1->setData(PieModel_1->index(9, 1, QModelIndex()), QString::number(t_fail));
 		PieModel_1->setData(PieModel_1->index(9, 0, QModelIndex()), PieItemcolors[9], Qt::DecorationRole);
 		PieModel_1->item(9,0)->setFont(itemFont);
@@ -414,40 +736,36 @@ void widget_count::slots_ShowPieImage2(QList<cErrorTypeCountInfo> pCountdates)
 
 }
 
-void widget_count::slots_ShowShiftIamge()
+void widget_count::slots_ShowShiftIamge(QString startTime,QString endTime,QList<long long> pTimes,QList<cErrorInfo> pInfos)
 {
+	QDateTime startDateT = QDateTime::fromString(startTime,"yyyyMMddhhmm");
+	QDateTime endDateT = QDateTime::fromString(endTime,"yyyyMMddhhmm");
 	int plottableCount = ui.CustomPlot->plottableCount();
 	if (plottableCount != 0)
 		ui.CustomPlot->clearPlottables();
+
 	// create empty bar chart objects:
-	CustomBars *nBar1 = new CustomBars(ui.CustomPlot->xAxis, ui.CustomPlot->yAxis);
-	CustomBars *nBar2 = new CustomBars(ui.CustomPlot->xAxis, ui.CustomPlot->yAxis);
-	CustomBars *nBar3 = new CustomBars(ui.CustomPlot->xAxis, ui.CustomPlot->yAxis);
-	nBar1->setAntialiased(false);
-	nBar2->setAntialiased(false);
-	nBar3->setAntialiased(false);
+	CustomBars *fossil = new CustomBars(ui.CustomPlot->xAxis, ui.CustomPlot->yAxis);
+	CustomBars *nuclear = new CustomBars(ui.CustomPlot->xAxis, ui.CustomPlot->yAxis);
+	nuclear->setAntialiased(false);
+	fossil->setAntialiased(false);
+	// set names and colors:
 	QList<QColor> colors;
-	colors<<QColor(0, 0, 255) << QColor(250, 0, 0)<<QColor(0, 168, 140);
-	
-	nBar1->setName(tr("Single Shift All Detect Number"));
-	nBar1->setPen(QPen(colors[0]));
+	colors<<QColor(0, 0, 255) << QColor(250, 0, 0);
+
+	fossil->setName(tr("All Detect Number"));
+	fossil->setPen(QPen(colors[0]));
 	colors[0].setAlpha(180);
-	nBar1->setBrush(colors[0]);
-
-	nBar2->setName(tr("Single Shift Failure Number"));
-	nBar2->setPen(QPen(colors[1]));
+	fossil->setBrush(colors[0]);
+	nuclear->setName(tr("Failure Number"));
+	nuclear->setPen(QPen(colors[1]));
 	colors[1].setAlpha(180);
-	nBar2->setBrush(colors[1]);
-
-	nBar3->setName(tr("Single Shift Failure Rate"));
-	nBar3->setPen(QPen(colors[2].lighter(130)));
-	nBar3->setBrush(colors[2]);
-	nBar3->setTextSuffix("%");
+	nuclear->setBrush(colors[1]);
 
 	//设置并排显示
 	QCPBarsGroup *group = new QCPBarsGroup(ui.CustomPlot);  
 	QList<QCPBars*> bars;
-	bars <<nBar1 <<nBar2<<nBar3 ;// << regen;
+	bars <<fossil <<nuclear ;// << regen;
 	foreach (QCPBars *bar, bars) {
 		// 设置柱状图的宽度类型为以key坐标轴计算宽度的大小，其实默认就是这种方式
 		bar->setWidthType(QCPBars::wtPlotCoords);
@@ -457,6 +775,210 @@ void widget_count::slots_ShowShiftIamge()
 	group->setSpacingType(QCPBarsGroup::stAbsolute);  // 设置组内柱状图的间距，按像素
 	group->setSpacing(2);     // 设置较小的间距值，这样看起来更紧凑
 
+	int startH = startDateT.time().hour();
+	int endH = endDateT.time().hour();
+	int startM = startDateT.time().minute();
+	int endM = endDateT.time().minute();
+	// prepare x axis with country labels:
+	QVector<double> ticks;
+	QVector<QString> labels;
+	// Add data:
+	QVector<double> fossilData, nuclearData;
+	int m_range = 1;
+	if (pMainFrm->SysConfigInfo.iSaveRecordInterval == 60)
+	{
+		if (startH < endH )
+		{
+			if (startM > 0 )
+				startH += 1;
+			if (endM > 0 )
+				endH += 1;
+		}
+		else
+		{
+			if (startM > 0 )
+				startH += 1;
+			if (endM > 0 )
+				endH += 1;
+			endH += 24;
+		}
+		int tmp = endH - startH;
+		m_range = tmp +1;
+		if ( tmp > 0 )
+		{
+			int index=0;
+			for (int i=1;i<=tmp;i++)
+			{
+				ticks<<i;
+				QString str = startDateT.addSecs(i*60*60).toString("hh:mm\nyyyy-MM-dd");
+				labels<<str;
+				QDateTime tmpT= QDateTime::fromString(QString::number(pTimes[index]),"yyyyMMddhhmm");
+				if (str == tmpT.toString("hh:mm\nyyyy-MM-dd") )
+				{
+					fossilData << pInfos[index].iAllCount;
+					nuclearData << pInfos[index].GetFailCount();
+					index++;
+				}
+				else
+				{
+					fossilData << 0;
+					nuclearData << 0;
+				}
+			}
+		}
+		else
+			return;
+	}
+	else
+	{
+		int tmp=0;
+		if (startH < endH)
+			tmp = (endH - startH)*2;
+		else
+			tmp = (endH + 24 - startH)*2;
+		if (startM > 0 && startM <= 30)
+			tmp -= 1;
+		else if(startM > 30 )
+			tmp -= 2;
+		if (endM > 0 && endM <= 30 )
+			tmp +=1;
+		else if(endM > 30)
+			tmp +=2;
+		m_range = tmp +1;
+		if ( tmp > 0 )
+		{
+			int index=0;
+			for (int i=1;i<=tmp;i++)
+			{
+				ticks<<i;
+				QString str = startDateT.addSecs(i*30*60).toString("hh:mm\nyyyy-MM-dd");
+				labels<<str;
+				QDateTime tmpT= QDateTime::fromString(QString::number(pTimes[index]),"yyyyMMddhhmm");
+				if (str == tmpT.toString("hh:mm\nyyyy-MM-dd") )
+				{
+					fossilData << pInfos[index].iAllCount;
+					nuclearData << pInfos[index].GetFailCount();
+					index++;
+				}
+				else
+				{
+					fossilData << 0;
+					nuclearData << 0;
+				}
+			}			
+		}
+		else
+			return;
+	}
+
+	QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
+	textTicker->addTicks(ticks, labels);
+	ui.CustomPlot->xAxis->setTicker(textTicker);
+	//ui.CustomPlot->xAxis->setTickLabelRotation(30);
+	ui.CustomPlot->xAxis->setSubTicks(false);
+	ui.CustomPlot->xAxis->setTickLength(0, 4);
+	ui.CustomPlot->xAxis->setRange(0, m_range);
+	ui.CustomPlot->xAxis->setBasePen(QPen(Qt::white));
+	ui.CustomPlot->xAxis->setTickPen(QPen(Qt::white));
+	ui.CustomPlot->xAxis->grid()->setVisible(true);
+	ui.CustomPlot->xAxis->grid()->setPen(QPen(QColor(130, 130, 130), 0, Qt::DotLine));
+	ui.CustomPlot->xAxis->setTickLabelColor(Qt::white);
+	ui.CustomPlot->xAxis->setLabelColor(Qt::white);
+	ui.CustomPlot->xAxis->setLabel(tr("Time(Hour)"));
+
+	int MaxNumber=0;
+	for(int i=0;i<fossilData.count();i++)
+	{
+		MaxNumber = MaxNumber > fossilData[i] ? MaxNumber : fossilData[i];
+	}
+	if (MaxNumber >= 10000)
+	{
+		MaxNumber +=10000;
+	}
+	else if (MaxNumber <10000 && MaxNumber >=1000)
+	{
+		MaxNumber += 1000;
+	}
+	else if (MaxNumber <1000 && MaxNumber >= 100)
+	{
+		MaxNumber+=100;
+	}
+	else if (MaxNumber <100 && MaxNumber >=10)
+	{
+		MaxNumber += 10 ;
+	}
+	else
+	{
+		MaxNumber += 2;
+	}
+
+	// prepare y axis:
+	ui.CustomPlot->yAxis->setRange(0, MaxNumber);
+	ui.CustomPlot->yAxis->setPadding(5); // a bit more space to the left border
+	ui.CustomPlot->yAxis->setLabel(tr("Failure Number Table(Ps)"));
+	ui.CustomPlot->yAxis->setBasePen(QPen(Qt::white));
+	ui.CustomPlot->yAxis->setTickPen(QPen(Qt::white));
+	ui.CustomPlot->yAxis->setSubTickPen(QPen(Qt::white));
+	ui.CustomPlot->yAxis->grid()->setSubGridVisible(true);
+	ui.CustomPlot->yAxis->setTickLabelColor(Qt::white);
+	ui.CustomPlot->yAxis->setLabelColor(Qt::white);
+	ui.CustomPlot->yAxis->grid()->setPen(QPen(QColor(130, 130, 130), 0, Qt::SolidLine));
+	ui.CustomPlot->yAxis->grid()->setSubGridPen(QPen(QColor(130, 130, 130), 0, Qt::DotLine));
+
+	//set data
+	fossil->setData(ticks, fossilData);
+	nuclear->setData(ticks, nuclearData);
+
+	// setup legend:
+	ui.CustomPlot->legend->setVisible(true);
+	ui.CustomPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop|Qt::AlignHCenter);
+	ui.CustomPlot->legend->setBrush(QColor(255, 255, 255, 100));
+	ui.CustomPlot->legend->setBorderPen(Qt::NoPen);
+	QFont legendFont = font();
+	legendFont.setPointSize(10);
+	ui.CustomPlot->legend->setFont(legendFont);
+	ui.CustomPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
+	ui.CustomPlot->replot();
+}
+
+
+void widget_count::slots_ShowShiftIamge(QList<long long> pTimes,QList<cErrorInfo> pInfos)
+{
+	int plottableCount = ui.CustomPlot->plottableCount();
+	if (plottableCount != 0)
+		ui.CustomPlot->clearPlottables();
+	// create empty bar chart objects:
+	CustomBars *fossil = new CustomBars(ui.CustomPlot->xAxis, ui.CustomPlot->yAxis);
+	CustomBars *nuclear = new CustomBars(ui.CustomPlot->xAxis, ui.CustomPlot->yAxis);
+	nuclear->setAntialiased(false);
+	fossil->setAntialiased(false);
+	// set names and colors:
+	QList<QColor> colors;
+	colors<<QColor(0, 0, 255) << QColor(250, 0, 0);
+
+	fossil->setName(tr("Single Shift All Detect Number"));
+	fossil->setPen(QPen(colors[0]));
+	colors[0].setAlpha(180);
+	fossil->setBrush(colors[0]);
+	nuclear->setName(tr("Single Shift Failure Number"));
+	nuclear->setPen(QPen(colors[1]));
+	colors[1].setAlpha(180);
+	nuclear->setBrush(colors[1]);
+
+	//设置并排显示
+	QCPBarsGroup *group = new QCPBarsGroup(ui.CustomPlot);  
+	QList<QCPBars*> bars;
+	bars <<fossil <<nuclear ;// << regen;
+	foreach (QCPBars *bar, bars) {
+		// 设置柱状图的宽度类型为以key坐标轴计算宽度的大小，其实默认就是这种方式
+		bar->setWidthType(QCPBars::wtPlotCoords);
+		bar->setWidth(bar->width() / bars.size()); // 设置柱状图的宽度大小
+		group->append(bar);  // 将柱状图加入柱状图分组中
+	}
+	group->setSpacingType(QCPBarsGroup::stAbsolute);  // 设置组内柱状图的间距，按像素
+	group->setSpacing(2);     // 设置较小的间距值，这样看起来更紧凑
+
+	// prepare x axis with country labels:
 	QVector<double> ticks;
 	QVector<QString> labels;
 	ticks<<1<<2<<3;
@@ -477,7 +999,59 @@ void widget_count::slots_ShowShiftIamge()
 	ui.CustomPlot->xAxis->setLabelColor(Qt::white);
 	ui.CustomPlot->xAxis->setLabel(tr("Shift(1,2,3)"));
 
-	ui.CustomPlot->yAxis->setRange(0, 1000);
+	QVector<double> fossilData, nuclearData;
+	int shiftCount[3]={0};
+	int shiftFailCount[3]={0};
+	for (int i=0;i<pTimes.count();i++)
+	{
+		QDateTime tmpTime=QDateTime::fromString(QString::number(pTimes[i]),"yyyyMMddhhmm");
+		if (tmpTime.time() > pMainFrm->SysConfigInfo.shift1Time  && tmpTime.time() <= pMainFrm->SysConfigInfo.shift2Time)
+		{
+			shiftCount[0] += pInfos[i].iAllCount;
+			shiftFailCount[0] += pInfos[i].GetFailCount();
+		}
+		else if (tmpTime.time() > pMainFrm->SysConfigInfo.shift2Time  && tmpTime.time() <= pMainFrm->SysConfigInfo.shift3Time)
+		{
+			shiftCount[1] += pInfos[i].iAllCount;
+			shiftFailCount[1] += pInfos[i].GetFailCount();
+		}
+		else
+		{
+			shiftCount[2] += pInfos[i].iAllCount;
+			shiftFailCount[2] += pInfos[i].GetFailCount();
+		}
+	}
+	fossilData<<shiftCount[0]<<shiftCount[1]<<shiftCount[2];
+	nuclearData<<shiftFailCount[0]<<shiftFailCount[1]<<shiftFailCount[2];
+
+	int MaxNumber=0;
+	for(int i=0;i<fossilData.count();i++)
+	{
+		MaxNumber = MaxNumber > fossilData[i] ? MaxNumber : fossilData[i];
+	}
+	if (MaxNumber >= 10000)
+	{
+		MaxNumber +=10000;
+	}
+	else if (MaxNumber <10000 && MaxNumber >=1000)
+	{
+		MaxNumber += 1000;
+	}
+	else if (MaxNumber <1000 && MaxNumber >= 100)
+	{
+		MaxNumber+=100;
+	}
+	else if (MaxNumber <100 && MaxNumber >=10)
+	{
+		MaxNumber += 10 ;
+	}
+	else
+	{
+		MaxNumber += 2;
+	}
+
+	// prepare y axis:
+	ui.CustomPlot->yAxis->setRange(0, MaxNumber);
 	ui.CustomPlot->yAxis->setPadding(5); // a bit more space to the left border
 	ui.CustomPlot->yAxis->setLabel(tr("Shift Failure Number Table(Ps)"));
 	ui.CustomPlot->yAxis->setBasePen(QPen(Qt::white));
@@ -489,16 +1063,9 @@ void widget_count::slots_ShowShiftIamge()
 	ui.CustomPlot->yAxis->grid()->setPen(QPen(QColor(130, 130, 130), 0, Qt::SolidLine));
 	ui.CustomPlot->yAxis->grid()->setSubGridPen(QPen(QColor(130, 130, 130), 0, Qt::DotLine));
 
-	// Add data:
-	QVector<double> nBar1Date, nBar2Date,nBar3Date;
-	nBar1Date<<800<<700<<900;
-	nBar2Date<<80<<70<<90;
-	nBar3Date<<10<<10<<10;
-
 	//setdata
-	nBar1->setData(ticks, nBar1Date);
-	nBar2->setData(ticks, nBar2Date);
-	nBar3->setData(ticks, nBar3Date);
+	fossil->setData(ticks, fossilData);
+	nuclear->setData(ticks, nuclearData);
 
 	// setup legend:
 	ui.CustomPlot->legend->setVisible(true);
@@ -512,7 +1079,6 @@ void widget_count::slots_ShowShiftIamge()
 	ui.CustomPlot->replot();
 
 }
-
 
 //自定义QCustomPlot直方图bar
 CustomBars::CustomBars(QCPAxis *keyAxis , QCPAxis *valueAxis)
@@ -619,4 +1185,115 @@ void CustomBars::draw(QCPPainter *painter) Q_DECL_OVERRIDE
 	// draw other selection decoration that isn't just line/scatter pens and brushes:
 	if (mSelectionDecorator)
 		mSelectionDecorator->drawDecoration(painter, selection());
+}
+
+ExportExcelThread::ExportExcelThread(QObject *parent /*= 0*/)
+{
+
+}
+
+ExportExcelThread::~ExportExcelThread()
+{
+
+}
+
+void ExportExcelThread::run()
+{
+	ExcelObject *m_ExcelObj=new ExcelObject();
+	ExcelObject::ERRORTYPE errCode=m_ExcelObj->init();
+	switch(errCode)
+	{
+	case ExcelObject::INIT_ERROR1:
+		{
+			QMessageBox::warning(NULL,tr("Error"),tr("Failed to create Excel object, please install Microsoft Excel."),QMessageBox::Apply);
+			return;
+		}
+		break;
+	case ExcelObject::INIT_ERROR2:
+		{
+			QMessageBox::warning(NULL,tr("Error"),tr("Get Microsoft Excel workbook error,Please check that Microsoft Excel is installed correctly."),QMessageBox::Apply);
+			return;
+		}
+		break;
+	default:
+		break;
+	}
+
+	QDate pDate = m_Date;
+	QString temp = pDate.toString(Qt::ISODate);
+	temp += " Report.xls";
+	QString fileName = pMainFrm->AppPaths.AppPath +"CountInfo/Report/"+temp ;
+
+	if (m_ExcelObj->m_Version.toFloat() > 11)
+	{ //xls是excel2003及以前版本生成的文件格式，而xlsx是excel2007及以后版本生成的文件格式。
+		fileName = fileName + "x";
+	}
+
+	QFileInfo fileInfo(fileName);
+	QDir fileDir(fileInfo.absolutePath());
+	if (!fileDir.exists())
+	{
+		fileDir.mkpath(fileInfo.absolutePath());
+	}
+	QFile m_file(fileName);
+	if (m_file.exists())
+	{
+		m_file.remove();
+	}
+
+	QString DateStr = pDate.toString(Qt::ISODate).replace("-","");
+	int row =1;
+	QList<long long> tmpTimes;
+	QList<cErrorInfo> tmpInfos;
+	pMainFrm->m_Datebase->queryByDay(DateStr ,tmpTimes,tmpInfos);
+	for (int i=0;i<tmpTimes.count();i++)
+	{
+		cErrorInfo info = tmpInfos[i];
+		int fristRow=row;
+		QDateTime time = QDateTime::fromString(QString::number(tmpTimes[i]), "yyyyMMddhhmm");  
+		m_ExcelObj->SetGeneralInfo(row++,tr("time: %1\nAll Count: %2   Fail Count: %3   Fail Rate: %4\nFront: %5   Clamp: %6   Rear: %7")
+									.arg(time.toString("yyyy-MM-dd hh:mm:ss"))
+									.arg(info.iAllCount)
+									.arg(info.GetFailCount())
+									.arg(QString::number(tmpInfos[i].GetFailRate() * 100 ,'f',2) + "%")
+									.arg(info.GetFrontCount())
+									.arg(info.GetClampCount())
+									.arg(info.GetRearCount()));
+		//标题
+		m_ExcelObj->SetTatilRow(row++);
+		QStringList dataList;
+		for (int k=1;k<pMainFrm->m_ErrorTypeInfo.iErrorTypeCount;k++)
+		{
+			int ErrorBytype=info.GetErrorByTypeCount(k);
+			if(ErrorBytype != 0)
+			{
+				dataList.clear();
+				dataList.append(pMainFrm->m_ErrorTypeInfo.iErrorType[k]);
+				dataList.append(QString::number(ErrorBytype));
+				dataList.append(QString::number(info.iFrontErrorByType[k]));
+				dataList.append(QString::number(info.iClampErrorByType[k]));
+				dataList.append(QString::number(info.iRearErrorByType[k]));
+				m_ExcelObj->SetRowData(row++,dataList);
+			}
+		}
+
+		//合计
+		dataList.clear();
+		dataList<<tr("SUM")
+			<<QString::number(info.GetFailCount())
+			<<QString::number(info.GetFrontCount())
+			<<QString::number(info.GetClampCount())
+			<<QString::number(info.GetRearCount());
+
+		m_ExcelObj->SetRowData(row++,dataList);
+
+		m_ExcelObj->SetBolder(fristRow,row++);
+	}
+
+	m_ExcelObj->SaveAs(fileName);
+	delete m_ExcelObj;
+	m_ExcelObj = NULL;
+
+	QDesktopServices::openUrl(QUrl("file:///" + QDir::toNativeSeparators(fileName)));
+	
 }

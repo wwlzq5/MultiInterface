@@ -1,37 +1,33 @@
 #ifndef WIDGET_SEVER_H
 #define WIDGET_SEVER_H
+
 #include <QWidget>
-#include <QMainWindow>
-#include "ui_Sever.h"
 #include <windows.h>
 #include "Stool.h"
 #include <QCloseEvent>
-//#define VNCTEST
-#ifdef VNCTEST
-#using "E:\MultiInterface\x64\123\BADControl.dll"
-#using "E:\MultiInterface\x64\123\System.Windows.Forms.dll"
-#using "E:\MultiInterface\x64\123\System.dll"
-using namespace BAD;
-using namespace System::Runtime::InteropServices;
-#else
+#include <QTimer>
 
-#endif // !1
-class Widget_Sever : public QMainWindow
+
+class VNC_widget : public QWidget
 {
 	Q_OBJECT
+public:
+	VNC_widget(QWidget *parent=0);
+	~VNC_widget();
 
-public:
-	Widget_Sever(QWidget *parent = 0,int temp =0);
-	~Widget_Sever();
-public:
-	void closeScreen();
-	void SetParam(int,int);
-protected:
-	void closeEvent(QCloseEvent *event);
-public:
-	void* m_plmp;
-public:
-	Ui::MainWindow ui;
+	bool Connect(int index);
+	bool disConnect();
+
+	void ShowWidget(int index);
+	void CloseWidget();
+
+private slots:
+	void Show();
+
+private:
+	void *m_plmp;
+	int CurrentCntIndex;
+
 };
 
 #endif // WIDGET_PLC_H

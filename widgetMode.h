@@ -27,6 +27,7 @@ public:
 signals:
 	void signal_ModeState(StateEnum,QString);
 public slots:
+	void slot_Refresh();
 	void slot_loadMode();
 	void slot_deleteMode();
 	void slot_showAddMode();

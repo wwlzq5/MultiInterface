@@ -1,7 +1,9 @@
 #include "multiinterface.h"
 #include <QApplication>
 #include <QTranslator>
-
+#include <DbgHelp.h>
+#pragma comment(lib,"Dbghelp.lib")
+static long  __stdcall CrashInfocallback(_EXCEPTION_POINTERS *pexcp);
 void KillSameDeathProcess(QString exestr)
 {
 	HANDLE handle;
@@ -65,6 +67,9 @@ int main(int argc, char *argv[])
 	}
 
 	QApplication a(argc, argv);
+
+	QApplication::addLibraryPath(".\\QtPlugins");
+
 	QTextCodec *codec = QTextCodec::codecForName("GBK"); 
 	QTextCodec::setCodecForLocale(codec); 
 	QTextCodec::setCodecForTr(codec);
@@ -75,6 +80,35 @@ int main(int argc, char *argv[])
 	a.installTranslator(translator);
 	
 	MultiInterface w;
-	w.show();
+	w.showMaximized();
 	return a.exec();
+}
+long  __stdcall CrashInfocallback( _EXCEPTION_POINTERS *pexcp)
+{
+	HANDLE hDumpFile = ::CreateFile(
+		L"MEMORY.DMP",
+		GENERIC_WRITE,
+		0,
+		NULL,
+		CREATE_ALWAYS,
+		FILE_ATTRIBUTE_NORMAL,
+		NULL
+		);
+	if( hDumpFile != INVALID_HANDLE_VALUE)
+	{
+		MINIDUMP_EXCEPTION_INFORMATION dumpInfo;
+		dumpInfo.ExceptionPointers = pexcp;
+		dumpInfo.ThreadId = ::GetCurrentThreadId();
+		dumpInfo.ClientPointers = TRUE;
+		::MiniDumpWriteDump(
+			::GetCurrentProcess(),
+			::GetCurrentProcessId(),
+			hDumpFile,
+			MiniDumpNormal,
+			&dumpInfo,
+			NULL,
+			NULL
+			);
+	}
+	return 0;
 }

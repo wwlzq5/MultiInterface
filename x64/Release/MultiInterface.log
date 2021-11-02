@@ -1,4 +1,2 @@
-﻿  multiinterface.cpp
-  LINK : 没有找到 ..\x64\123\\MultiInterface.exe 或上一个增量链接没有生成它；正在执行完全链接
-     正在创建库 ..\x64\123\MultiInterface.lib 和对象 ..\x64\123\MultiInterface.exp
+﻿     正在创建库 ..\x64\123\\MultiInterface.lib 和对象 ..\x64\123\\MultiInterface.exp
   MultiInterface.vcxproj -> E:\MultiInterface\MultiInterface\..\x64\123\MultiInterface.exe

@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'widgetSever.h'
 **
-** Created: Mon Oct 18 18:49:30 2021
+** Created: Tue Nov 2 15:06:11 2021
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.2)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -17,65 +17,78 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-static const uint qt_meta_data_Widget_Sever[] = {
+static const uint qt_meta_data_VNC_widget[] = {
 
  // content:
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       0,    0, // methods
+       1,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
        0,       // signalCount
 
+ // slots: signature, parameters, type, tag, flags
+      12,   11,   11,   11, 0x08,
+
        0        // eod
 };
 
-static const char qt_meta_stringdata_Widget_Sever[] = {
-    "Widget_Sever\0"
+static const char qt_meta_stringdata_VNC_widget[] = {
+    "VNC_widget\0\0Show()\0"
 };
 
-void Widget_Sever::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void VNC_widget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
-    Q_UNUSED(_o);
-    Q_UNUSED(_id);
-    Q_UNUSED(_c);
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        VNC_widget *_t = static_cast<VNC_widget *>(_o);
+        switch (_id) {
+        case 0: _t->Show(); break;
+        default: ;
+        }
+    }
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData Widget_Sever::staticMetaObjectExtraData = {
+const QMetaObjectExtraData VNC_widget::staticMetaObjectExtraData = {
     0,  qt_static_metacall 
 };
 
-const QMetaObject Widget_Sever::staticMetaObject = {
-    { &QMainWindow::staticMetaObject, qt_meta_stringdata_Widget_Sever,
-      qt_meta_data_Widget_Sever, &staticMetaObjectExtraData }
+const QMetaObject VNC_widget::staticMetaObject = {
+    { &QWidget::staticMetaObject, qt_meta_stringdata_VNC_widget,
+      qt_meta_data_VNC_widget, &staticMetaObjectExtraData }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &Widget_Sever::getStaticMetaObject() { return staticMetaObject; }
+const QMetaObject &VNC_widget::getStaticMetaObject() { return staticMetaObject; }
 #endif //Q_NO_DATA_RELOCATION
 
-const QMetaObject *Widget_Sever::metaObject() const
+const QMetaObject *VNC_widget::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
 }
 
-void *Widget_Sever::qt_metacast(const char *_clname)
+void *VNC_widget::qt_metacast(const char *_clname)
 {
     if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_Widget_Sever))
-        return static_cast<void*>(const_cast< Widget_Sever*>(this));
-    return QMainWindow::qt_metacast(_clname);
+    if (!strcmp(_clname, qt_meta_stringdata_VNC_widget))
+        return static_cast<void*>(const_cast< VNC_widget*>(this));
+    return QWidget::qt_metacast(_clname);
 }
 
-int Widget_Sever::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int VNC_widget::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
-    _id = QMainWindow::qt_metacall(_c, _id, _a);
+    _id = QWidget::qt_metacall(_c, _id, _a);
     if (_id < 0)
         return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 1)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 1;
+    }
     return _id;
 }
 QT_END_MOC_NAMESPACE

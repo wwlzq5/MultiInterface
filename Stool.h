@@ -1,7 +1,22 @@
 #ifndef STOOL_H
 #define STOOL_H
+
+
 #define HORIZONTAL24 sizeof(int)*24
 #define HORIZONTAL4 sizeof(int)*4
+
+
+
+// #define IP1 "10.41.61.15"
+// #define IP2 "10.41.63.241"
+// #define IP3 "10.41.61.10"
+
+#define IP1 "192.168.250.201"
+#define IP2 "192.168.250.202"
+#define IP3 "192.168.250.203"
+
+#define PASSWORD "123456"
+
 enum StateEnum
 {
 	SENDDATA,//发送数据模式
@@ -26,6 +41,7 @@ enum UnitEnum
 	CLAMPING,//夹持
 	BACKING//后端
 };
+
 struct IpStruct
 {
 	QString ipAddress; //ip地址
@@ -46,4 +62,11 @@ struct MyStruct
 	int nFail;//前端通过out3得到的踢废总数
 	char nTemp[256];//前端的多余变量
 };
+
+typedef struct _ErrorInfo
+{
+	int	iErrorTypeCount;					
+	QList<QString> iErrorType;
+}s_ErrorInfo;
+
 #endif

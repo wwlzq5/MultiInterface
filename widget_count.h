@@ -7,12 +7,20 @@
 
 #include <QPushButton>
 #include <QStandardItemModel>
+#include <QSettings>
+#include <QThread>
+#include <QDateTime>
+#include <QDesktopServices>
+#include <QUrl>
 
 #include "pieview.h"
 #include "qcustomplot.h"
+#include "ExcelObject.h"
 
-#define  MAX_CAMERA_COUNT 30
+#include<windows.h>
+#include<tlhelp32.h>
 
+class cErrorInfo;
 //错误信息类-单一缺陷
 class cErrorTypeCountInfo;
 //错误信息类-每个小时错误
@@ -20,12 +28,14 @@ class cErrorCountbyTime;
 //自定义QCustomPlot直方图bar
 class CustomBars;
 
+class ExportExcelThread;
+
 class widget_count : public QWidget
 {
 	Q_OBJECT
 
 public:
-	widget_count(int CameraNum = 0,QWidget *parent = 0);
+	widget_count(QWidget *parent = 0);
 	~widget_count();
 
 	enum table2UpdateType
@@ -35,9 +45,26 @@ public:
 	};
 private:
 	void init();
+	void openInNotePad(QString str);
+	DWORD GetProcessIdFromName(const char*processName);
+	QTime initTime(QTime pTime);
 
 private slots:
 	void slots_turnPage();
+	void slot_saveRecordOK_clicked();
+	void slot_saveRecordCancel_clicked();
+	void slot_shiftOK_clicked();
+	void slot_shiftCancel_clicked();
+	void slots_ShowPie(QModelIndex);
+	void slot_HistorySearch_clicked();
+	void slot_OpenRecord_clicked();
+	void slot_DeleteRecord_clicked();
+	void slot_OpenExcel_clicked();
+	void slot_SearchShift_clicked();
+
+signals:
+	void updateRecordSet();
+	void updateShiftSet();
 
 public slots:
 	/**********************************************************
@@ -48,30 +75,34 @@ public slots:
 	/**********************************************************
 		更新显示每个相机检测的缺陷数
 	***********************************************************/
-	void slots_UpdateTable1(QList<cErrorTypeCountInfo> pCountdates);
+	void slots_UpdateTable1(cErrorInfo pCountdates);
 	/**********************************************************
 		显示每半个小数或一个小时数据
 		删除表格已有数据行，重新添加所有数据
 		若List为空，只清除表格数据
 	***********************************************************/
-	void slots_UpdateTable2(QList<cErrorCountbyTime> pCountdates);
+	void slots_UpdateTable2(QList<long long> pTimes,QList<cErrorInfo> pInfos);
 	/**********************************************************
 		显示每半个小数或一个小时数据
 		重载，只添加一个数据，插入到行尾，不删除已有表格数据
 	***********************************************************/
-	void slots_UpdateTable2(cErrorCountbyTime pCountdate);
+	void slots_UpdateTable2(QString ptime ,cErrorInfo pCountdate);
 	/**********************************************************
 		绘制每小时缺陷占比饼图
 	***********************************************************/
-	void slots_ShowPieImage1(QList<cErrorTypeCountInfo> pCountdates);
+	void slots_ShowPieImage1(cErrorInfo pCountdates);
 	/**********************************************************
 		绘制每个班次缺陷占比饼图
 	***********************************************************/
 	void slots_ShowPieImage2(QList<cErrorTypeCountInfo> pCountdates);
 	/**********************************************************
-		绘制每小时检测总数与踢废总数
+		直方图：绘制每小时检测总数与踢废总数 
 	***********************************************************/
-	void slots_ShowShiftIamge();
+	void slots_ShowShiftIamge(QString startTime,QString endTime,QList<long long> pTimes,QList<cErrorInfo> pInfos);
+	/**********************************************************
+		直方图：绘制班次检测总数与踢废总数 
+	***********************************************************/
+	void slots_ShowShiftIamge(QList<long long> pTimes,QList<cErrorInfo> pInfos);
 
 
 private:
@@ -79,7 +110,6 @@ private:
 	QPushButton *buttonTurn;
 	QStandardItemModel *table1Model;
 	QStandardItemModel *table2Model;
-	int nCamNum;
 	PieView *pieImage1;
 	QStandardItemModel *PieModel_1;
 
@@ -87,7 +117,26 @@ private:
 	QStandardItemModel *PieModel_2;
 
 	QList<QColor> PieItemcolors;
-	
+	ExportExcelThread *ExportThread;
+};
+
+class ExportExcelThread :public QThread
+{
+	Q_OBJECT
+public:
+	ExportExcelThread(QObject *parent = 0);
+	~ExportExcelThread();
+
+	void run();
+	//void InitShiftTime(QTime pShift1,QTime pShift2,QTime pShift3);
+
+public:
+	QDate m_Date;
+
+private:
+	QList<QTime> m_shifts;
+	int curShift;
+	bool iShowAllnum;
 };
 
 //自定义QCustomPlot直方图bar
@@ -132,20 +181,14 @@ public:
 		iErrorFailCount = 0;
 		iFailCount = 0;
 		iCheckCount = 0;
-		for (int i=0;i<MAX_CAMERA_COUNT;i++)
-		{
-			iCamErrorNum[i]=0;
-		}
+		iFrontCount = 0;
+		iClampCount = 0;
+		iRearCount = 0;
 	}
 	//各相机求和
 	int sum()
-	{
-		int total=0;
-		for (int i=0;i<MAX_CAMERA_COUNT;i++)
-		{
-			total += iCamErrorNum[i];
-		}
-		return total;
+	{		
+		return iFrontCount+iClampCount+iRearCount;
 	}
 
 	void operator= (const cErrorTypeCountInfo pErrorInfo)
@@ -155,10 +198,9 @@ public:
 		iErrorFailCount = pErrorInfo.iErrorFailCount;
 		iFailCount = pErrorInfo.iFailCount;
 		iCheckCount = pErrorInfo.iCheckCount;
-		for (int i=0;i<MAX_CAMERA_COUNT;i++)
-		{
-			iCamErrorNum[i] += pErrorInfo.iCamErrorNum[i];
-		}
+		iFrontCount = pErrorInfo.iFrontCount;
+		iClampCount = pErrorInfo.iClampCount;
+		iRearCount =  pErrorInfo.iRearCount;
 	}
 
 	void clear()
@@ -168,24 +210,27 @@ public:
 		iErrorFailCount =0;
 		iFailCount = 0;
 		iCheckCount = 0;
-		for (int i=0;i<MAX_CAMERA_COUNT;i++)
-		{
-			iCamErrorNum[i]=0;
-		}
+		iFrontCount = 0;
+		iClampCount = 0;
+		iRearCount = 0;
 	}
 
 	//缺陷类型
 	int iErrorType;
 	//缺陷名称（中 或 英）
 	QString iErrorTxt;
-	//各相机检测缺陷数
-	int iCamErrorNum[MAX_CAMERA_COUNT];
 	//某种缺陷踢废总数
 	int iErrorFailCount;
 	//踢废总数
 	int iFailCount;
 	//检测总数
 	int iCheckCount;
+	//前壁踢废数
+	int iFrontCount;
+	//夹持踢废数
+	int iClampCount;
+	//后壁踢废数
+	int iRearCount;
 };
 
 //错误信息类-每个小时错误
@@ -197,19 +242,17 @@ public:
 		iTime = 0;
 		iAllcount = 0;
 		iErrorCount = 0;
-		for (int i=0;i<MAX_CAMERA_COUNT;i++)
-		{
-			iCamErrorNum[i] = 0;
-		}
+		iFrontCount = 0;
+		iClampCount = 0;
+		iRearCount = 0;
 	}
 
 	//同一时间下单个相机不同缺陷相加总数
 	void operator+= (const cErrorCountbyTime pCountInfo)
 	{
-		for (int i=0;i<MAX_CAMERA_COUNT;i++)
-		{
-			iCamErrorNum[i] += pCountInfo.iCamErrorNum[i];
-		}
+		iFrontCount += pCountInfo.iFrontCount;
+		iClampCount += pCountInfo.iClampCount;
+		iRearCount  += pCountInfo.iRearCount;
 	}
 
 	void operator= (const cErrorCountbyTime pCountInfo)
@@ -217,10 +260,9 @@ public:
 		iTime = pCountInfo.iTime;
 		iAllcount = pCountInfo.iAllcount;
 		iErrorCount = pCountInfo.iErrorCount;
-		for (int i=0;i<MAX_CAMERA_COUNT;i++)
-		{
-			iCamErrorNum[i] = pCountInfo.iCamErrorNum[i];
-		}
+		iFrontCount = pCountInfo.iFrontCount;
+		iClampCount = pCountInfo.iClampCount;
+		iRearCount =  pCountInfo.iRearCount;
 	}
 
 	void clear()
@@ -228,10 +270,9 @@ public:
 		iTime = 0;
 		iAllcount = 0;
 		iErrorCount = 0;
-		for (int i=0;i<MAX_CAMERA_COUNT;i++)
-		{
-			iCamErrorNum[i] = 0;
-		}
+		iFrontCount = 0;
+		iClampCount = 0;
+		iRearCount = 0;
 	}
 	//转换时间字符串格式 例：2021-07-27 16:00
 	QString GetTimeStr()
@@ -254,55 +295,204 @@ public:
 	int iAllcount;
 	//缺陷总数
 	int iErrorCount;
-	//单个相机不同缺陷累加数
-	int iCamErrorNum[MAX_CAMERA_COUNT];
+	//前壁踢废数
+	int iFrontCount;
+	//夹持踢废数
+	int iClampCount;
+	//后壁踢废数
+	int iRearCount;
 };
-/*
+
 class cErrorInfo
 {
 public:
 	cErrorInfo()
 	{
-		iTime =0;
-		iAllcount=0;
-		iErrorCount = 0;
-
-	}
-
-	//获取同一时间 有多少种不同的缺陷
-	int GetErrorTypeCount()
-	{
-		if (iErrorNames.count() != 0)
-			return iErrorNames.count();
-		else
-			return iErrorTypes.count();
-	}
-
-	void clear()
-	{
-		iTime =0;
-		iAllcount=0;
-		iErrorCount = 0;
-		iErrorTypes.clear();
-		iErrorNames.clear();
-		for (int i=0;i<MAX_CAMERA_COUNT;i++)
+		iAllCount = 0 ;
+		iFailCount = 0;
+		FrontCount = 0;
+		ClampCount = 0;
+		RearCount = 0;
+		for (int i=0;i<50;i++)
 		{
-			iCamErrorNum[i].clear();
+			iErrorByType[i] = 0;
+			iFrontErrorByType[i] = 0;
+			iClampErrorByType[i] = 0;
+			iRearErrorByType[i] = 0;
 		}
 	}
 
-	//时间
-	long long iTime;
-	//检测总数
-	int iAllcount;	
-	//缺陷总数
-	int iErrorCount;
-	//缺陷类型
-	QList<int> iErrorTypes;
-	//缺陷名称
-	QList<QString> iErrorNames;
-	//单个相机不同缺陷累加数
-	QList<int> iCamErrorNum[MAX_CAMERA_COUNT];
+	void operator+= (const cErrorInfo &pCountInfo)
+	{
+		iAllCount  += pCountInfo.iAllCount ;
+		iFailCount += pCountInfo.iFailCount;
+		FrontCount += pCountInfo.FrontCount;
+		ClampCount += pCountInfo.ClampCount;
+		RearCount  += pCountInfo.RearCount;
+		for (int i=0;i<50;i++)
+		{
+			iErrorByType[i]		 += pCountInfo.iErrorByType[i];
+			iFrontErrorByType[i] += pCountInfo.iFrontErrorByType[i];
+			iClampErrorByType[i] += pCountInfo.iClampErrorByType[i];
+			iRearErrorByType[i]  += pCountInfo.iRearErrorByType[i] ;
+		}
+	}
+
+	cErrorInfo operator + (const cErrorInfo &pCountInfo)
+	{
+		cErrorInfo tmp;
+		tmp.iAllCount = this->iAllCount   + pCountInfo.iAllCount ;
+		tmp.iFailCount= this->iFailCount  + pCountInfo.iFailCount;
+		tmp.FrontCount= this->FrontCount  + pCountInfo.FrontCount;
+		tmp.ClampCount= this->ClampCount  + pCountInfo.ClampCount;
+		tmp.RearCount = this->RearCount   + pCountInfo.RearCount;
+		for (int i=0;i<50;i++)
+		{
+			tmp.iErrorByType[i]		 = this->iErrorByType[i]	  + pCountInfo.iErrorByType[i];
+			tmp.iFrontErrorByType[i] = this->iFrontErrorByType[i] + pCountInfo.iFrontErrorByType[i];
+			tmp.iClampErrorByType[i] = this->iClampErrorByType[i] + pCountInfo.iClampErrorByType[i];
+			tmp.iRearErrorByType[i]  = this->iRearErrorByType[i]  + pCountInfo.iRearErrorByType[i] ;
+		}
+		return tmp;
+	}
+
+	void operator-= (const cErrorInfo &pCountInfo)
+	{
+		iAllCount  -= pCountInfo.iAllCount ;
+		iFailCount -= pCountInfo.iFailCount;
+		FrontCount -= pCountInfo.FrontCount;
+		ClampCount -= pCountInfo.ClampCount;
+		RearCount  -= pCountInfo.RearCount;
+		for (int i=0;i<50;i++)
+		{
+			iErrorByType[i]		 -= pCountInfo.iErrorByType[i];
+			iFrontErrorByType[i] -= pCountInfo.iFrontErrorByType[i];
+			iClampErrorByType[i] -= pCountInfo.iClampErrorByType[i];
+			iRearErrorByType[i]  -= pCountInfo.iRearErrorByType[i] ;
+		}
+	}
+
+	cErrorInfo operator - (const cErrorInfo &pCountInfo)
+	{
+		cErrorInfo tmp;
+		tmp.iAllCount = this->iAllCount   - pCountInfo.iAllCount ;
+		tmp.iFailCount= this->iFailCount  - pCountInfo.iFailCount;
+		tmp.FrontCount= this->FrontCount  - pCountInfo.FrontCount;
+		tmp.ClampCount= this->ClampCount  - pCountInfo.ClampCount;
+		tmp.RearCount = this->RearCount   - pCountInfo.RearCount;
+		for (int i=0;i<50;i++)
+		{
+			tmp.iErrorByType[i]		 = this->iErrorByType[i]	  - pCountInfo.iErrorByType[i];
+			tmp.iFrontErrorByType[i] = this->iFrontErrorByType[i] - pCountInfo.iFrontErrorByType[i];
+			tmp.iClampErrorByType[i] = this->iClampErrorByType[i] - pCountInfo.iClampErrorByType[i];
+			tmp.iRearErrorByType[i]  = this->iRearErrorByType[i]  - pCountInfo.iRearErrorByType[i] ;
+		}
+		return tmp;
+	}
+
+	void operator= (const cErrorInfo &pCountInfo)
+	{
+		iAllCount =	pCountInfo.iAllCount ;
+		iFailCount = pCountInfo.iFailCount;
+		FrontCount = pCountInfo.FrontCount;
+		ClampCount = pCountInfo.ClampCount;
+		RearCount = pCountInfo.RearCount;
+		for (int i=0;i<50;i++)
+		{
+			iErrorByType[i]		 = pCountInfo.iErrorByType[i];
+			iFrontErrorByType[i] = pCountInfo.iFrontErrorByType[i];
+			iClampErrorByType[i] = pCountInfo.iClampErrorByType[i];
+			iRearErrorByType[i]  = pCountInfo.iRearErrorByType[i] ;
+		}
+	}
+
+	int GetFrontCount()
+	{
+		int pCount=0;
+		for (int i=0;i<50;i++)
+		{
+			pCount += iFrontErrorByType[i];
+		}
+		return pCount;
+	}
+
+	int GetClampCount()
+	{
+		int pCount=0;
+		for (int i=0;i<50;i++)
+		{
+			pCount += iClampErrorByType[i];
+		}
+		return pCount;
+	}
+
+	int GetRearCount()
+	{
+		int pCount=0;
+		for (int i=0;i<50;i++)
+		{
+			pCount += iRearErrorByType[i];
+		}
+		return pCount;
+	}
+
+	int GetFailCount()
+	{
+		return GetFrontCount() + GetClampCount() + GetRearCount();
+	}
+
+	double GetFailRate()
+	{
+		if (iAllCount > 0)
+			return (double)GetFailCount() / iAllCount ;
+		else
+			return 0.0;
+		
+	}
+
+	int GetErrorByTypeCount(int ptype)
+	{
+		if(ptype>=50)
+			return 0;
+		return iFrontErrorByType[ptype] + iClampErrorByType[ptype] + iRearErrorByType[ptype];
+	}
+
+	void Clear()
+	{
+		iAllCount = 0 ;
+		iFailCount = 0;
+		FrontCount = 0;
+		ClampCount = 0;
+		RearCount = 0;
+		for (int i=0;i<50;i++)
+		{
+			iErrorByType[i] = 0;
+			iFrontErrorByType[i] = 0;
+			iClampErrorByType[i] = 0;
+			iRearErrorByType[i] = 0;
+		}
+	}
+
+	//过检总数
+	int iAllCount;
+	//踢废总数
+	int iFailCount;
+	//前壁总数
+	int FrontCount;
+	//夹持总数
+	int ClampCount;
+	//后壁总数
+	int RearCount;
+
+	//单个缺陷类型踢废数
+	int iErrorByType[50];
+
+	//前壁单个缺陷类型踢废数
+	int iFrontErrorByType[50];
+	//夹持单个缺陷类型踢废数
+	int iClampErrorByType[50];
+	//后壁单个缺陷类型踢废数
+	int iRearErrorByType[50];
 };
-*/
+
 #endif // WIDGET_COUNT_H

@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'widgetMode.h'
 **
-** Created: Sat Sep 18 14:48:00 2021
+** Created: Tue Nov 2 15:06:11 2021
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.2)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -23,7 +23,7 @@ static const uint qt_meta_data_widget_Mode[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       6,   14, // methods
+       7,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -35,19 +35,20 @@ static const uint qt_meta_data_widget_Mode[] = {
 
  // slots: signature, parameters, type, tag, flags
       51,   12,   12,   12, 0x0a,
-      67,   12,   12,   12, 0x0a,
-      85,   12,   12,   12, 0x0a,
-     104,   12,   12,   12, 0x0a,
+      66,   12,   12,   12, 0x0a,
+      82,   12,   12,   12, 0x0a,
+     100,   12,   12,   12, 0x0a,
      119,   12,   12,   12, 0x0a,
+     134,   12,   12,   12, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_widget_Mode[] = {
     "widget_Mode\0\0,\0signal_ModeState(StateEnum,QString)\0"
-    "slot_loadMode()\0slot_deleteMode()\0"
-    "slot_showAddMode()\0slot_addMode()\0"
-    "slots_ShowSelectImage(QModelIndex)\0"
+    "slot_Refresh()\0slot_loadMode()\0"
+    "slot_deleteMode()\0slot_showAddMode()\0"
+    "slot_addMode()\0slots_ShowSelectImage(QModelIndex)\0"
 };
 
 void widget_Mode::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -57,11 +58,12 @@ void widget_Mode::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         widget_Mode *_t = static_cast<widget_Mode *>(_o);
         switch (_id) {
         case 0: _t->signal_ModeState((*reinterpret_cast< StateEnum(*)>(_a[1])),(*reinterpret_cast< QString(*)>(_a[2]))); break;
-        case 1: _t->slot_loadMode(); break;
-        case 2: _t->slot_deleteMode(); break;
-        case 3: _t->slot_showAddMode(); break;
-        case 4: _t->slot_addMode(); break;
-        case 5: _t->slots_ShowSelectImage((*reinterpret_cast< QModelIndex(*)>(_a[1]))); break;
+        case 1: _t->slot_Refresh(); break;
+        case 2: _t->slot_loadMode(); break;
+        case 3: _t->slot_deleteMode(); break;
+        case 4: _t->slot_showAddMode(); break;
+        case 5: _t->slot_addMode(); break;
+        case 6: _t->slots_ShowSelectImage((*reinterpret_cast< QModelIndex(*)>(_a[1]))); break;
         default: ;
         }
     }
@@ -99,9 +101,9 @@ int widget_Mode::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 6)
+        if (_id < 7)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 6;
+        _id -= 7;
     }
     return _id;
 }

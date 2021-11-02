@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'ProdectMode.ui'
 **
-** Created: Sat Sep 18 14:48:00 2021
+** Created: Tue Nov 2 15:06:11 2021
 **      by: Qt User Interface Compiler version 4.8.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -33,6 +33,7 @@ public:
     QLabel *label;
     QPushButton *pushButton_sure;
     QLineEdit *lineEdit;
+    QPushButton *pushButton_Refresh;
 
     void setupUi(QWidget *widgetMode)
     {
@@ -41,16 +42,16 @@ public:
         widgetMode->resize(797, 557);
         pushButton_new = new QPushButton(widgetMode);
         pushButton_new->setObjectName(QString::fromUtf8("pushButton_new"));
-        pushButton_new->setGeometry(QRect(11, 498, 261, 23));
+        pushButton_new->setGeometry(QRect(220, 500, 161, 23));
         tableView = new QTableView(widgetMode);
         tableView->setObjectName(QString::fromUtf8("tableView"));
         tableView->setGeometry(QRect(20, 10, 761, 471));
         pushButton_add = new QPushButton(widgetMode);
         pushButton_add->setObjectName(QString::fromUtf8("pushButton_add"));
-        pushButton_add->setGeometry(QRect(290, 500, 251, 23));
+        pushButton_add->setGeometry(QRect(420, 500, 161, 23));
         pushButton_delete = new QPushButton(widgetMode);
         pushButton_delete->setObjectName(QString::fromUtf8("pushButton_delete"));
-        pushButton_delete->setGeometry(QRect(560, 500, 221, 23));
+        pushButton_delete->setGeometry(QRect(610, 500, 161, 23));
         label = new QLabel(widgetMode);
         label->setObjectName(QString::fromUtf8("label"));
         label->setGeometry(QRect(11, 527, 261, 23));
@@ -60,6 +61,9 @@ public:
         lineEdit = new QLineEdit(widgetMode);
         lineEdit->setObjectName(QString::fromUtf8("lineEdit"));
         lineEdit->setGeometry(QRect(290, 530, 321, 20));
+        pushButton_Refresh = new QPushButton(widgetMode);
+        pushButton_Refresh->setObjectName(QString::fromUtf8("pushButton_Refresh"));
+        pushButton_Refresh->setGeometry(QRect(40, 500, 151, 23));
 
         retranslateUi(widgetMode);
 
@@ -74,6 +78,7 @@ public:
         pushButton_delete->setText(QApplication::translate("widgetMode", "delete mode", 0, QApplication::UnicodeUTF8));
         label->setText(QString());
         pushButton_sure->setText(QApplication::translate("widgetMode", "sure", 0, QApplication::UnicodeUTF8));
+        pushButton_Refresh->setText(QApplication::translate("widgetMode", "Refresh", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };

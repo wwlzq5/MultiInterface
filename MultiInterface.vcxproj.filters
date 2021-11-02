@@ -160,6 +160,15 @@
     <ClCompile Include="widgetMode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ExcelObject.cpp">
+      <Filter>widget_count</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ExcelObject.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ExcelObject.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="multiinterface.h">
@@ -170,9 +179,6 @@
     </CustomBuild>
     <CustomBuild Include="multiinterface.qrc">
       <Filter>Resource Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="Sever.ui">
-      <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="clogfile.h">
       <Filter>Header Files</Filter>
@@ -253,6 +259,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="Resources\LOGO.ico" />
+    <CustomBuild Include="ExcelObject.h">
+      <Filter>widget_count</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MultiInterface.rc" />

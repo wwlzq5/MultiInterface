@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'AlertWidget.ui'
 **
-** Created: Sat Sep 18 14:47:59 2021
+** Created: Tue Nov 2 15:06:11 2021
 **      by: Qt User Interface Compiler version 4.8.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!

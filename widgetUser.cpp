@@ -22,7 +22,7 @@ UserWidget::UserWidget(QWidget *parent)
 
 UserWidget::~UserWidget()
 {
-	close();
+	//close();
 }
 void UserWidget::ShowInterfance()
 {
@@ -116,7 +116,7 @@ void UserWidget::slots_login()
 		return;
 	}
 	ui.lineEdit_passWord->clear();
-	close();
+	hide();
 	iUserPerm = true;
 	emit signal_TimeLogin(QTime::currentTime());
 }

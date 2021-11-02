@@ -1,5 +1,14 @@
 #include "widgetSever.h"
+
+#define VNCTEST
 #ifdef VNCTEST
+#using "E:\MultiInterface\x64\123\BADControl.dll"
+#using "E:\MultiInterface\x64\123\System.Windows.Forms.dll"
+#using "E:\MultiInterface\x64\123\System.dll"
+using namespace BAD;
+using namespace System::Runtime::InteropServices;
+
+
 #define __GCHANDLE_TO_VOIDPTR(x) ((GCHandle::operator System::IntPtr(x)).ToPointer())
 #define __VOIDPTR_TO_GCHANDLE(x) (GCHandle::operator GCHandle(System::IntPtr(x)))
 inline BadControl^ GetImpObj(void *pHandle)
@@ -12,110 +21,131 @@ inline BadControl^ GetImpObj(void *pHandle)
 	return person;
 }
 
-Widget_Sever::Widget_Sever(QWidget *parent,int id)
-	: QMainWindow(parent)
+VNC_widget::VNC_widget(QWidget *parent/*=0*/)
+	:QWidget(parent)
 {
-	ui.setupUi(this);
-	setWindowIcon(QIcon("./Resources/LOGO.png"));
 	setWindowFlags(Qt::FramelessWindowHint);
 	setWindowState(Qt::WindowMaximized);
-	BadControl^ nTest = gcnew BadControl();
-	GCHandle handle= GCHandle::Alloc(nTest);
-#ifdef TESTREMOTE
-	if(id == 1)
-	{
-		setWindowTitle(tr("Anterior wall display"));
-		nTest->Name = "123";
-		nTest->HostAddress = "192.168.20.124";
-	}else if(id == 2)
-	{
-		setWindowTitle(tr("Clamping display"));
-		nTest->Name = "1234";
-		nTest->HostAddress = "192.168.20.143";
-	}else if(id == 3){
-		setWindowTitle(tr("Posterior wall display"));
-		nTest->Name = "12345";
-		nTest->HostAddress = "192.168.20.116";
-	}
-#else
-	if(id == 1)
-	{
-		setWindowTitle(tr("Anterior wall display"));
-		nTest->Name = "123";
-		nTest->HostAddress = "192.168.250.201";
-	}else if(id == 2)
-	{
-		setWindowTitle(tr("Clamping display"));
-		nTest->Name = "1234";
-		nTest->HostAddress = "192.168.250.202";
-	}else if(id == 3){
-		setWindowTitle(tr("Posterior wall display"));
-		nTest->Name = "12345";
-		nTest->HostAddress = "192.168.250.203";
-	}
-#endif
-	
-	nTest->Password = "123456";
-	m_plmp = __GCHANDLE_TO_VOIDPTR(handle);
-	int test = nTest->Handle.ToInt32();
-	SetParent((HWND)(test),ui.Sever->winId());
-}
-Widget_Sever::~Widget_Sever()
-{
-	BadControl^ nTest = GetImpObj(m_plmp);
-	if(nTest->IsControlConnected)
-	{
-		nTest->CloseConnection();
-	}
-	close();
+
+	BadControl^ nVNCCtrl1 = gcnew BadControl();
+
+	GCHandle pHandel1= GCHandle::Alloc(nVNCCtrl1);
+
+	m_plmp = __GCHANDLE_TO_VOIDPTR(pHandel1);
+
+	CurrentCntIndex=0;
+
+	int test = nVNCCtrl1->Handle.ToInt32();
+	SetParent((HWND)(test),this->winId());
 }
 
-void Widget_Sever::closeEvent(QCloseEvent *e)
+VNC_widget::~VNC_widget()
 {
-	BadControl^ nTest = GetImpObj(m_plmp);
-	if(nTest->IsControlConnected)
+
+}
+
+bool VNC_widget::Connect(int index)
+{
+	if (index>3 || index < 0)
+		return false;
+	bool ret=false;
+	BadControl^ nVNCControl = GetImpObj(m_plmp);
+
+	if(!nVNCControl->IsControlConnected)
 	{
-		nTest->CloseConnection();
+		nVNCControl->SetScreenSize(2500,1500);
+		switch(index)
+		{
+		case 0:
+			nVNCControl->HostAddress = IP1;
+			nVNCControl->Password = PASSWORD;
+			break;
+		case 1:
+			nVNCControl->HostAddress = IP2;
+			nVNCControl->Password = PASSWORD;
+			break;
+		case 2:
+			nVNCControl->HostAddress = IP3;
+			nVNCControl->Password = PASSWORD;
+			break;
+		default:
+			break;
+		}
+		ret=nVNCControl->Connect();
 	}
+	return ret;
+}
+
+bool VNC_widget::disConnect()
+{
+	bool ret=true;
+	BadControl^ nVNCControl = GetImpObj(m_plmp);
+	if(nVNCControl->IsControlConnected)
+	{
+		ret = nVNCControl->CloseConnection();
+	}
+	return ret;
+}
+
+void VNC_widget::ShowWidget(int index)
+{
+	if (index>3 || index < 0)
+		return;
+	disConnect();
+	CurrentCntIndex = index;
+	QTimer::singleShot(100,this,SLOT(Show()));
+
+}
+
+void VNC_widget::CloseWidget()
+{
 	hide();
-	e->accept();
+	disConnect();
 }
-void Widget_Sever::closeScreen()
+
+void VNC_widget::Show()
 {
-	BadControl^ nTest = GetImpObj(m_plmp);
-	if(nTest->IsControlConnected)
+	bool ret = Connect(CurrentCntIndex);
+	if (ret)
 	{
-		nTest->CloseConnection();
+		if(this->isHidden())
+			this->show();
 	}
 }
-void Widget_Sever::SetParam(int width,int height)
-{
-	setWindowState(Qt::WindowMaximized);
-	BadControl^ nTests = GetImpObj(m_plmp);
-	if(!nTests->IsControlConnected)
-	{
-		nTests->SetScreenSize(width,height);
-		nTests->Connect();
-	}
-}
+
 #else
-Widget_Sever::Widget_Sever(QWidget *parent,int id)
-	: QMainWindow(parent)
-{
-	ui.setupUi(this);
-	setWindowIcon(QIcon("./Resources/LOGO.png"));
-	setWindowFlags(Qt::FramelessWindowHint);
-	setWindowState(Qt::WindowMaximized);
-}
-Widget_Sever::~Widget_Sever()
+
+VNC_widget::VNC_widget(QWidget *parent)
+	:QWidget(parent)
 {
 
 }
-void Widget_Sever::closeEvent(QCloseEvent *event)
+
+VNC_widget::~VNC_widget()
 {
+
 }
-void Widget_Sever::SetParam(int width,int height)
+
+bool VNC_widget::Connect(int index)
 {
+	return true;
+}
+bool VNC_widget::disConnect()
+{
+	return true;
+}
+void VNC_widget::ShowWidget(int index)
+{
+
+}
+void VNC_widget::CloseWidget()
+{
+
+}
+
+void VNC_widget::Show()
+{
+
 }
 #endif // !1
 

@@ -8,6 +8,7 @@
 #include <QTcpSocket>
 #include <QList>
 #include <QTimer>
+#include <QTime>
 #include <QMutex>
 #include <QVector>
 #include <QSignalMapper>
@@ -25,6 +26,27 @@
 #include "widget_count.h"
 #include "widgetMode.h"
 #include <time.h>
+
+struct SystemConfigInfo
+{
+	int iSaveRecordInterval;
+	bool isSaveRecord;
+	QTime shift1Time;
+	QTime shift2Time;
+	QTime shift3Time;
+	bool isAutoClear;
+};
+
+struct Paths
+{
+	QString AppPath;
+	QString configPath;
+	QString PLCAlertPath;
+	QString errorTypePath;
+	QString modelTypePath;
+	QString LastdataPath;
+};
+
 class MultiInterface : public QMainWindow
 {
 	Q_OBJECT
@@ -39,11 +61,16 @@ public:
 	void closeEvent(QCloseEvent *event);
 	void CalculateData(QByteArray);
 	void onServerConnected(QString IPAddress,bool nState);
+	void ClearCount(bool isChangeShift = true);
+	void UpdateCountForShow(bool isFirst=false);
 	void SaveCountInfo();
+	void SaveToDatebase();
+	void DataAnalysis();
 	void mouseMoveEvent(QMouseEvent *event);
 	void mousePressEvent(QMouseEvent *event);
 	void SendBasicNet(StateEnum,QString);
 	void ChangeVncState(int);
+
 public:
 	int nSheetPage;
 	bool nOver;
@@ -59,11 +86,16 @@ public slots:
 	void slots_ConnectState();
 	void slots_OnUpdateIOCard(int*,int);
 	void slots_TimeLogin(QTime);
-	//void slots_SaveCountInfo();
+	void slots_SaveCountBytime();
+	void slots_SaveCountByShift();
+	void slots_UpdateRecordSet();
+	void slots_UpdateShiftSet();
 public:
 	static DWORD WINAPI DataHanldThread( void *arg );
 	static DWORD WINAPI DataCountThread( void *arg );
 public:
+	Paths AppPaths;
+	s_ErrorInfo m_ErrorTypeInfo;
 	QMutex nDataLock;
 	QMutex nCountLock;
 	QTimer* nConnectState;
@@ -71,24 +103,28 @@ public:
 	QVector<IpStruct> IPAddress;
 	QTcpServer* m_temptcpServer;
 	QSignalMapper* signal_mapper;
-	DataBase* nSqliteBase;
+	DataBase* m_Datebase;
 	QList<QByteArray> nDataList;
-	Widget_Sever* m_sever[3];
+	VNC_widget* mVNC_window;
 	IOCardClass* nIOCard[3];
 	CLogFile* Logfile;
 	QWidget * nIOprence;
-	UserWidget* nUserWidget;
+	//UserWidget* nUserWidget;
 	Widget_Warning* nWarning;
 	widget_Alert* nAlert;
 	widget_count* nWidgetCount;
 	widget_Mode* nWidgetMode;
 	QList<QByteArray> nDataCount[3];
 	MyErrorType nSendData[256];
+	cErrorInfo nRunInfo,LastRunInfo,nTmpcountData;
+	SystemConfigInfo SysConfigInfo;
 public:
 	int nAllCheckNum;
 	int nAllFailNum;
-	time_t n_StartTime;
-	time_t n_EndTime;
+	QDateTime n_StartTime;
+	QDateTime n_EndTime;
+	QTimer *timerSaveList;
+	int currentShift;
 private:
 	Ui::MultiInterfaceClass ui;
 };

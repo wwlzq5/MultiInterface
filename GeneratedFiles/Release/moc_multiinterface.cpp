@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'multiinterface.h'
 **
-** Created: Wed Sep 22 09:31:13 2021
+** Created: Tue Nov 2 15:06:11 2021
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.2)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -23,7 +23,7 @@ static const uint qt_meta_data_MultiInterface[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       9,   14, // methods
+      13,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -42,6 +42,10 @@ static const uint qt_meta_data_MultiInterface[] = {
      173,   15,   15,   15, 0x0a,
      194,   16,   15,   15, 0x0a,
      225,   15,   15,   15, 0x0a,
+     248,   15,   15,   15, 0x0a,
+     272,   15,   15,   15, 0x0a,
+     297,   15,   15,   15, 0x0a,
+     321,   15,   15,   15, 0x0a,
 
        0        // eod
 };
@@ -53,7 +57,9 @@ static const char qt_meta_stringdata_MultiInterface[] = {
     "slots_clickAccont(int)\0ServerNewConnection()\0"
     "onServerDataReady()\0slots_ConnectState()\0"
     "slots_OnUpdateIOCard(int*,int)\0"
-    "slots_TimeLogin(QTime)\0"
+    "slots_TimeLogin(QTime)\0slots_SaveCountBytime()\0"
+    "slots_SaveCountByShift()\0"
+    "slots_UpdateRecordSet()\0slots_UpdateShiftSet()\0"
 };
 
 void MultiInterface::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -71,6 +77,10 @@ void MultiInterface::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         case 6: _t->slots_ConnectState(); break;
         case 7: _t->slots_OnUpdateIOCard((*reinterpret_cast< int*(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         case 8: _t->slots_TimeLogin((*reinterpret_cast< QTime(*)>(_a[1]))); break;
+        case 9: _t->slots_SaveCountBytime(); break;
+        case 10: _t->slots_SaveCountByShift(); break;
+        case 11: _t->slots_UpdateRecordSet(); break;
+        case 12: _t->slots_UpdateShiftSet(); break;
         default: ;
         }
     }
@@ -108,9 +118,9 @@ int MultiInterface::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 9)
+        if (_id < 13)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 9;
+        _id -= 13;
     }
     return _id;
 }
