@@ -1,234 +1,250 @@
 #include "database.h"
-#include <Qdebug>
-DataBase::DataBase()
+
+
+DataBase::DataBase(QString spath)
 {
+	AppPath = spath;
+	sqlConnectName = "multiinterface";
+
 	createConnection();
-	createTable();
-	memset(&m_MyData,0,sizeof(TemporaryData));
+	createReportTable();
+	createLastDataTable();
 }
 //建立一个数据库连接
 bool DataBase::createConnection()
 {
 	//QStringList strlist = QSqlDatabase::drivers();
-	//以后就可以用"sqlite1"与数据库进行连接了
-	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "sqlite1");
-	db.setDatabaseName(".//Report.db");
-	if( !db.open())
+	QSqlDatabase m_db = QSqlDatabase::addDatabase("QSQLITE",sqlConnectName);
+		m_db.setDatabaseName("Report.db");
+	if( !m_db.open())
 	{
 		return false;
 	}
-	nName[0] = "Leading";
-	nName[1] = "Clamping";
-	nName[2] = "Backing";
-	nCountCamera[0]=24;
-	nCountCamera[1]=4;
-	nCountCamera[2]=24;
 	return true;
 }
 
 //创建数据库表
-bool DataBase::createTable()
+bool DataBase::createReportTable()
 {
-	QSqlDatabase db = QSqlDatabase::database("sqlite1"); //建立数据库连接
-	QSqlQuery query(db);
-	for(int i=0;i<3;i++)
+	QSqlDatabase m_db = QSqlDatabase::database(sqlConnectName);
+	if(!m_db.isOpen())
+		m_db.open();
+	QSqlQuery query(m_db);
+	QString sql("create table Report(time varchar,AllCount int,FrontErrorByType blob,ClampErrorByType blob,RearErrorByType blob)");
+	bool ret=query.exec(sql);
+	return ret;
+}
+
+bool DataBase::createLastDataTable()
+{
+	QSqlDatabase m_db = QSqlDatabase::database(sqlConnectName);
+	if(!m_db.isOpen())
+		m_db.open();
+	QSqlQuery query(m_db);
+	QString sql("create table LastData(AllCount int,failCount int,iAllcount int,FrontErrorByType blob,ClampErrorByType blob,RearErrorByType blob)");
+	bool ret=query.exec(sql);
+	return ret;
+}
+
+bool DataBase::insert(QString timestr,cErrorInfo info)
+{
+	QByteArray frontData,ClampData,RearData;
+	frontData.append((char*)info.iFrontErrorByType,sizeof(int)*50);
+	ClampData.append((char*)info.iClampErrorByType,sizeof(int)*50);
+	RearData.append((char*)info.iRearErrorByType,sizeof(int)*50);
+
+	QSqlDatabase m_db = QSqlDatabase::database(sqlConnectName);
+	if(!m_db.isOpen())
+		m_db.open();
+	QSqlQuery query(m_db);
+	QString strsql = "insert into Report(time,AllCount,FrontErrorByType,ClampErrorByType,RearErrorByType) values(:time,:AllCount,:FrontErrorByType,:ClampErrorByType,:RearErrorByType)";
+	query.prepare(strsql);
+	query.bindValue(":time",timestr);
+	query.bindValue(":AllCount",info.iAllCount);
+	query.bindValue(":FrontErrorByType",frontData);
+	query.bindValue(":ClampErrorByType",ClampData);
+	query.bindValue(":RearErrorByType",RearData);	
+	bool ret = query.exec();
+	return ret;
+}
+
+
+bool DataBase::queryByOnce(QString timeStr,long long &ptime,cErrorInfo &info)
+{
+	QByteArray frontData,ClampData,RearData;
+	QSqlDatabase m_db = QSqlDatabase::database(sqlConnectName);
+	if(!m_db.isOpen())
+		m_db.open();
+	QSqlQuery query(m_db);
+	QString sql = QString("select * from Report where time = %1").arg(timeStr);
+	bool ret = query.exec(sql);
+	if(ret)
 	{
-		QString sql = QString("create table %1(id varchar,AllCount int,TickCount int,type int,failCount int").arg(nName[i]);
-		for(int j=1;j<=nCountCamera[i];j++)
+		//QSqlRecord rec = query.record();
+		while(query.next())
 		{
-			sql+=QString(",camera%1 int").arg(j);
+			ptime = query.value(0).toLongLong() ;
+			info.iAllCount = query.value(1).toInt();
+			frontData = query.value(2).toByteArray();
+			ClampData = query.value(3).toByteArray();
+			RearData  = query.value(4).toByteArray();
+
+			for (int i=0;i<50;i++)
+			{
+				int tmp=0;
+				memcpy(&tmp,frontData.data() + sizeof(int)*i,sizeof(int));
+				info.iFrontErrorByType[i]=tmp;
+				tmp=0;
+				memcpy(&tmp,ClampData.data() + sizeof(int)*i,sizeof(int));
+				info.iClampErrorByType[i]=tmp;
+				tmp=0;
+				memcpy(&tmp,RearData.data() + sizeof(int)*i,sizeof(int));
+				info.iRearErrorByType[i]=tmp;
+			}
+				
 		}
-		sql+=")";
-		query.exec(sql);
 	}
-	return true;
+	return ret;
 }
 
-//向数据库中插入记录
-bool DataBase::insert(QString id,TemporaryData temp,int NameID)
+bool DataBase::queryByDay(QString dayStr,QList<long long> &pTimes,QList<cErrorInfo> &infos)
 {
-	QSqlDatabase db = QSqlDatabase::database("sqlite1"); //建立数据库连接
-	QSqlQuery query(db);
-	QString sql="";
-	for(int i=1;i<50;i++)
+	QByteArray frontData,ClampData,RearData;
+	QSqlDatabase m_db = QSqlDatabase::database(sqlConnectName);
+	if(!m_db.isOpen())
+		m_db.open();
+	QSqlQuery query(m_db);
+	QString sql = QString("select * from Report where time like '%1%' order by time asc").arg(dayStr);
+	bool ret = query.exec(sql);
+	if(ret)
 	{
-		if(temp.nCameraTypeCount[i] == 0)
+		while(query.next())
 		{
-			continue;
+			cErrorInfo tmpInfo;
+			pTimes << query.value(0).toLongLong() ;
+			tmpInfo.iAllCount = query.value(1).toInt();
+			frontData = query.value(2).toByteArray();
+			ClampData = query.value(3).toByteArray();
+			RearData  = query.value(4).toByteArray();
+
+			for (int i=0;i<50;i++)
+			{
+				int tmp=0;
+				memcpy(&tmp,frontData.data() + sizeof(int)*i,sizeof(int));
+				tmpInfo.iFrontErrorByType[i]=tmp;
+				tmp=0;
+				memcpy(&tmp,ClampData.data() + sizeof(int)*i,sizeof(int));
+				tmpInfo.iClampErrorByType[i]=tmp;
+				tmp=0;
+				memcpy(&tmp,RearData.data() + sizeof(int)*i,sizeof(int));
+				tmpInfo.iRearErrorByType[i]=tmp;
+			}
+			infos<<tmpInfo;
 		}
-		sql +=QString("insert into %1 values(").arg(nName[NameID]);
-		sql += id;
-		sql+=QString(",%1").arg(temp.nAllCount);
-		sql+=QString(",%1").arg(temp.nFailCount);
-		sql+=QString(",%1").arg(i);
-		sql+=QString(",%1").arg(temp.nCameraTypeCount[i]);
-		for(int j=0; j < nCountCamera[NameID]; j++)
+	}
+	return ret;
+}
+
+bool DataBase::queryByShift(QString pStartTime,QString pEndTime,QList<long long> &pTimes,QList<cErrorInfo> &infos)
+{
+	QByteArray frontData,ClampData,RearData;
+	QSqlDatabase m_db = QSqlDatabase::database(sqlConnectName);
+	if(!m_db.isOpen())
+		m_db.open();
+	QSqlQuery query(m_db);
+	QString sql = QString("select * from Report where time > %1 and time <= %2 ").arg(pStartTime).arg(pEndTime);
+	bool ret = query.exec(sql);
+	if(ret)
+	{
+		while(query.next())
 		{
-			sql+=QString(",%1").arg(temp.nTypeCount[j][i]);
+			cErrorInfo tmpInfo;
+			pTimes << query.value(0).toLongLong() ;
+			tmpInfo.iAllCount = query.value(1).toInt();
+			frontData = query.value(2).toByteArray();
+			ClampData = query.value(3).toByteArray();
+			RearData  = query.value(4).toByteArray();
+
+			for (int i=0;i<50;i++)
+			{
+				int tmp=0;
+				memcpy(&tmp,frontData.data() + sizeof(int)*i,sizeof(int));
+				tmpInfo.iFrontErrorByType[i]=tmp;
+				tmp=0;
+				memcpy(&tmp,ClampData.data() + sizeof(int)*i,sizeof(int));
+				tmpInfo.iClampErrorByType[i]=tmp;
+				tmp=0;
+				memcpy(&tmp,RearData.data() + sizeof(int)*i,sizeof(int));
+				tmpInfo.iRearErrorByType[i]=tmp;
+			}
+			infos<<tmpInfo;
 		}
-		sql+=")";
-		query.exec(sql);
-		sql.clear();
 	}
-	return true;
+	return ret;
 }
 
-//查询所有信息
-QList<SeleteData> DataBase::queryAll(QString id,int NameID)
+bool DataBase::insertLastData(int AllCount,int failCount,cErrorInfo info)
 {
-	QSqlDatabase db = QSqlDatabase::database("sqlite1"); //建立数据库连接
-	QSqlQuery query(db);
-	query.exec(QString("select * from %1 where id like '%2%'").arg(nName[NameID]).arg(id));//20200921____
-	QSqlRecord rec = query.record();
-	QList<SeleteData> m_SeleteData;
-	while(query.next())
+	QByteArray frontData,ClampData,RearData;
+	frontData.append((char*)info.iFrontErrorByType,sizeof(int)*50);
+	ClampData.append((char*)info.iClampErrorByType,sizeof(int)*50);
+	RearData.append((char*)info.iRearErrorByType,sizeof(int)*50);
+
+	QSqlDatabase m_db = QSqlDatabase::database(sqlConnectName);
+	if(!m_db.isOpen())
+		m_db.open();
+	QSqlQuery query(m_db);
+	QString deleteSql = "delete from LastData";
+	query.exec(deleteSql);
+
+	QString strsql = "insert into LastData(AllCount,failCount,iAllcount,FrontErrorByType,ClampErrorByType,RearErrorByType) values(:AllCount,:failCount,:iAllcount,:FrontErrorByType,:ClampErrorByType,:RearErrorByType)";
+	query.prepare(strsql);
+	query.bindValue(":AllCount",AllCount);
+	query.bindValue(":failCount",failCount);
+	query.bindValue(":iAllcount",info.iAllCount);
+	query.bindValue(":FrontErrorByType",frontData);
+	query.bindValue(":ClampErrorByType",ClampData);
+	query.bindValue(":RearErrorByType",RearData);	
+	bool ret = query.exec();
+	return ret;
+}
+
+bool DataBase::queryLastData(int &AllCount,int &failCount,cErrorInfo &info)
+{
+	QByteArray frontData,ClampData,RearData;
+	QSqlDatabase m_db = QSqlDatabase::database(sqlConnectName);
+	if(!m_db.isOpen())
+		m_db.open();
+	QSqlQuery query(m_db);
+	QString sql = QString("select * from LastData");
+	bool ret = query.exec(sql);
+	if(ret)
 	{
-		SeleteData m_data;
-		m_data.id = query.value(0).toLongLong();
-		m_data.nAllCount = query.value(1).toInt();
-		m_data.nFailCount = query.value(2).toInt();
-		m_data.nType = query.value(3).toInt();
-		m_data.nCameraTypeCount = query.value(4).toInt();
-		for(int i = 0;i<nCountCamera[NameID];i++)
+		//QSqlRecord rec = query.record();
+		while(query.next())
 		{
-			m_data.nTypeCount[i] = query.value(i+5).toInt();
+			AllCount = query.value(0).toInt();
+			failCount = query.value(1).toInt();
+			info.iAllCount = query.value(2).toInt();
+			frontData = query.value(3).toByteArray();
+			ClampData = query.value(4).toByteArray();
+			RearData  = query.value(5).toByteArray();
+
+			for (int i=0;i<50;i++)
+			{
+				int tmp=0;
+				memcpy(&tmp,frontData.data() + sizeof(int)*i,sizeof(int));
+				info.iFrontErrorByType[i]=tmp;
+				tmp=0;
+				memcpy(&tmp,ClampData.data() + sizeof(int)*i,sizeof(int));
+				info.iClampErrorByType[i]=tmp;
+				tmp=0;
+				memcpy(&tmp,RearData.data() + sizeof(int)*i,sizeof(int));
+				info.iRearErrorByType[i]=tmp;
+			}
+
 		}
-		m_SeleteData<<m_data;
 	}
-	return m_SeleteData;
+	return ret;
 }
 
-QList<SeleteData> DataBase::queryAll(QString startTime,QString endTime,int NameID)
-{
-	QSqlDatabase db = QSqlDatabase::database("sqlite1"); //建立数据库连接
-	QSqlQuery query(db);
-	QString abc = QString("select * from %1 where id > %2 and id <= %3 ").arg(nName[NameID]).arg(startTime).arg(endTime);
-	query.exec(abc);//20200921____
-
-	QSqlRecord rec = query.record();
-	QList<SeleteData> m_SeleteData;
-	while(query.next())
-	{
-		SeleteData m_data;
-		m_data.id = query.value(0).toLongLong();
-		m_data.nAllCount = query.value(1).toInt();
-		m_data.nFailCount = query.value(2).toInt();
-		m_data.nType = query.value(3).toInt();
-		m_data.nCameraTypeCount = query.value(4).toInt();
-		for(int i = 0;i<nCountCamera[NameID];i++)
-		{
-			m_data.nTypeCount[i] = query.value(i+5).toInt();
-		}
-		m_SeleteData<<m_data;
-	}
-	return m_SeleteData;
-}
-
-//根据ID删除记录
-bool DataBase::deleteById(int id)
-{
-	QSqlDatabase db = QSqlDatabase::database("sqlite1"); //建立数据库连接
-	QSqlQuery query(db);
-	query.prepare(QString("delete from Report where id = %1").arg(id));
-	if(!query.exec())
-	{
-		return false;
-	}
-	return true;
-}
-
-bool DataBase::deleteFromDate(QString dateId)
-{
-	QString pData = dateId + "0000";
-	QSqlDatabase db = QSqlDatabase::database("sqlite1"); //建立数据库连接
-	QSqlQuery query(db);
-	query.prepare(QString("delete from Report where id in ( select id from Report where id < %1 )").arg(pData));
-	if(!query.exec())
-	{
-		return false;
-	}
-	return true;
-}
-
-//根据ID更新记录
-bool DataBase::updateById(int id)
-{
-	//query.exec();
-	return true;
-}
-
-//排序
-QList<SeleteData> DataBase::sortById(QString id)
-{
-	QSqlDatabase db = QSqlDatabase::database("sqlite1"); //建立数据库连接
-	QSqlQuery query(db);
-	bool success=query.exec(QString("select * from Report where id = %1 order by failCount desc ").arg(id));  //降序
-	QSqlRecord rec = query.record();
-	QList<SeleteData> m_SeleteData;
-	while(query.next())
-	{
-		SeleteData m_data;
-		m_data.id = query.value(0).toLongLong();
-		m_data.nAllCount = query.value(1).toInt();
-		m_data.nFailCount = query.value(2).toInt();
-		m_data.nType = query.value(3).toInt();
-		m_data.nCameraTypeCount = query.value(4).toInt();
-		for(int i = 0;i<nCountCamera[i];i++)
-		{
-			m_data.nTypeCount[i] = query.value(i+5).toInt();
-		}
-		m_SeleteData<<m_data;
-		m_data.SeleteDatClear();
-	}
-	return m_SeleteData;
-}
-
-QList<SeleteData> DataBase::queryAllByOrder( QString id )
-{	//查询当天所有数据 按时间和不同缺陷的缺陷数 升序 查询
-	QSqlDatabase db = QSqlDatabase::database("sqlite1"); //建立数据库连接
-	QSqlQuery query(db);
-	query.exec(QString("select * from Report where id like '%1%' order by id,failCount").arg(id));//20200921____
-	QSqlRecord rec = query.record();
-	QList<SeleteData> m_SeleteData;
-	while(query.next())
-	{
-		SeleteData m_data;
-		m_data.id = query.value(0).toLongLong();
-		m_data.nAllCount = query.value(1).toInt();
-		m_data.nFailCount = query.value(2).toInt();
-		m_data.nType = query.value(3).toInt();
-		m_data.nCameraTypeCount = query.value(4).toInt();
-		for(int i = 0;i<nCountCamera[i];i++)
-		{
-			m_data.nTypeCount[i] = query.value(i+5).toInt();
-		}
-		m_SeleteData<<m_data;
-		m_data.SeleteDatClear();
-	}
-	return m_SeleteData;
-}
-
-QList<SeleteData> DataBase::queryOnce( QString id )
-{
-	QSqlDatabase db = QSqlDatabase::database("sqlite1"); //建立数据库连接
-	QSqlQuery query(db);
-	bool success=query.exec(QString("select * from Report where id = %1 order by failCount").arg(id));  //缺陷数升序
-	QSqlRecord rec = query.record();
-	QList<SeleteData> m_SeleteData;
-	while(query.next())
-	{
-		SeleteData m_data;
-		m_data.id = query.value(0).toLongLong();
-		m_data.nAllCount = query.value(1).toInt();
-		m_data.nFailCount = query.value(2).toInt();
-		m_data.nType = query.value(3).toInt();
-		m_data.nCameraTypeCount = query.value(4).toInt();
-		for(int i = 0;i<nCountCamera[i];i++)
-		{
-			m_data.nTypeCount[i] = query.value(i+5).toInt();
-		}
-		m_SeleteData<<m_data;
-		m_data.SeleteDatClear();
-	}
-	return m_SeleteData;
-}

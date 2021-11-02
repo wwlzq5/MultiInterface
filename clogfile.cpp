@@ -79,7 +79,7 @@ void WriteLogThread::WaitThreadStop()
 
 void WriteLogThread::Initpath(e_SaveLogType logtype)
 {
-	QString apppath;// = m_widget.GetCurrentAppPath();
+	QString apppath = GetCurrentAppPath();
 	switch(logtype)
 	{
 	case OperationLog:
