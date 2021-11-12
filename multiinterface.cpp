@@ -92,7 +92,7 @@ void MultiInterface::InitConfig()
 	erroriniset.setIniCodec(QTextCodec::codecForName("GBK"));
 	m_ErrorTypeInfo.iErrorTypeCount = erroriniset.value("/ErrorType/total",0).toInt();
 	m_ErrorTypeInfo.iErrorType.clear();
-	for (int i=0;i<m_ErrorTypeInfo.iErrorTypeCount;i++)
+	for (int i=0;i<=m_ErrorTypeInfo.iErrorTypeCount;i++)
 	{
 		if (0 == i)
 		{
@@ -150,7 +150,7 @@ void MultiInterface::InitConfig()
 	nIptemp.ipAddress=IP3;
 	nIptemp.nstate = false;
 	IPAddress<<nIptemp;
-	nSheetPage = 0;
+	nSheetPage = MAININTERFACE;
 	
 	n_StartTime =QDateTime::currentDateTime();
 }
@@ -236,7 +236,6 @@ void MultiInterface::InitConnect()
 }
 void MultiInterface::ChangeVncState(int nTest)
 {
-	//SendBasicNet(IMAGE,"NULL");
 	mVNC_window->ShowWidget(nTest);
 }
 void MultiInterface::slots_ModeState(StateEnum nState,QString nTemp)
@@ -265,41 +264,33 @@ void MultiInterface::slots_clickAccont(int nTest)
 	{
 	case 0:
 		ChangeVncState(0);
+		nSheetPage = NLEADING;
 		Logfile->write(tr("into Front Interface"),OperationLog);
 		break;
 	case 1:
 		ChangeVncState(1);
+		nSheetPage = NCLAMPING;
 		Logfile->write(tr("into Clamping Interface"),OperationLog);
 		break;
 	case 2:
 		ChangeVncState(2);
+		nSheetPage = NBACKING;
 		Logfile->write(tr("into Backing Interface"),OperationLog);
 		break;
 	case 3:
 		ui.stackedWidget->setCurrentWidget(nIOprence);
-// 		nIOprence->raise();
-// 		nIOprence->show();
 		Logfile->write(tr("into IOCard Interface"),OperationLog);
 		break;
 	case 4:
 		ui.stackedWidget->setCurrentWidget(nAlert);
-// 		nAlert->raise();
-// 		nAlert->show();
 		Logfile->write(tr("into Alert Interface"),OperationLog);
 		break;
 	case 5:
-// 		for(int i=0;i<3;i++)
-// 		{
-// 			nDataCount[i].clear();
-// 		}
-		//SendBasicNet(CLEAR,NULL);
 		ClearCount(false);
 		Logfile->write(tr("into Clear Interface"),OperationLog);
 		break;
 	case 6:
 		ui.stackedWidget->setCurrentWidget(nWidgetMode);
-// 		nWidgetMode->raise();
-// 		nWidgetMode->show();
 		Logfile->write(tr("into Mode Interface"),OperationLog);
 		break;
 	case 7:
@@ -486,7 +477,7 @@ void MultiInterface::SaveCountInfo()
 	writeStream<<tr("Clamp Count:  %1").arg(nTmpcountData.GetClampCount())<<"\t";
 	writeStream<<tr("Rear Count:  %1").arg(nTmpcountData.GetRearCount())<<"\n";
 
-	for(int i=1;i<m_ErrorTypeInfo.iErrorTypeCount;i++)
+	for(int i=1;i<=m_ErrorTypeInfo.iErrorTypeCount;i++)
 	{
 		writeStream<<m_ErrorTypeInfo.iErrorType[i] + ":" + QString::number(nTmpcountData.GetErrorByTypeCount(i))<<"\t";
 	}
@@ -581,15 +572,12 @@ void MultiInterface::onServerDataReady()
 		int nGetDataSize = sizeof(MyStruct)+256*sizeof(MyErrorType);
 		if(buffer.size() == nGetDataSize && ((MyStruct*)buffer.data())->nUnit == LEADING)
 		{
-			//Logfile->write("1 get data",CheckLog);
 			nDataCount[0].push_back(buffer);
 		}else if(buffer.size() == nGetDataSize && ((MyStruct*)buffer.data())->nUnit == CLAMPING)
 		{
-			//Logfile->write("2 get data",CheckLog);
 			nDataCount[1].push_back(buffer);
 		}else if(buffer.size() == nGetDataSize && ((MyStruct*)buffer.data())->nUnit == BACKING)
 		{
-			//Logfile->write("3 get data",CheckLog);
 			nDataCount[2].push_back(buffer);
 		}
 	}else if(((MyStruct*)buffer.data())->nState == CONNECT)//心跳包，用于判断是否掉线
@@ -609,17 +597,13 @@ void MultiInterface::onServerDataReady()
 	}
 	else if(((MyStruct*)buffer.data())->nState == LOCKSCREEN)
 	{
-		//Logfile->write(QString("LOCKSCREEN"),OperationLog);
 		n_StartTime=QDateTime::currentDateTime();
 	}
 	else if(((MyStruct*)buffer.data())->nState == ALERT)//接口卡和错误显示
 	{
 		if(buffer.size() == sizeof(MyStruct)+24*sizeof(int))
 		{
-			//nDataLock.lock();
-			//Logfile->write("get alert data",CheckLog);
 			nDataList.push_back(buffer);
-			//nDataLock.unlock();
 		}
 	}else if(((MyStruct*)buffer.data())->nState == SEVERS)//从第四块接口卡获取过检总数和踢废总数
 	{
@@ -634,7 +618,6 @@ void MultiInterface::onServerDataReady()
 	{
 		if(nSheetPage != NLEADING)
 		{
-			//Sleep(1000);
 			ChangeVncState(0);
 			nSheetPage = NLEADING;
 		}
@@ -642,7 +625,6 @@ void MultiInterface::onServerDataReady()
 	{
 		if(nSheetPage != NCLAMPING)
 		{
-			//Sleep(1000);
 			ChangeVncState(1);
 			nSheetPage = NCLAMPING;
 		}
@@ -650,13 +632,13 @@ void MultiInterface::onServerDataReady()
 	{
 		if(nSheetPage != NBACKING)
 		{
-			//Sleep(1000);
 			ChangeVncState(2);
 			nSheetPage = NBACKING;
 		}
 	}else if(((MyStruct*)buffer.data())->nState == MAININTERFACE)
 	{
 		mVNC_window->CloseWidget();
+		nSheetPage = MAININTERFACE;
 	}
 }
 DWORD WINAPI MultiInterface::DataCountThread( void *arg )
@@ -690,21 +672,21 @@ DWORD WINAPI MultiInterface::DataCountThread( void *arg )
 				if((nErrorFristData[i].nType > 0 && nErrorFristData[i].nType < 50)||(nErrorClampData[i].nType > 0 && nErrorClampData[i].nType < 50)||(nErrorBACKData[i].nType > 0 && nErrorBACKData[i].nType<50))//综合有缺陷，计数加1
 				{
 					pThis->nRunInfo.iFailCount += 1;
-					if(nErrorFristData[i].nErrorArea <= nErrorClampData[i].nErrorArea && nErrorClampData[i].nErrorArea >= nErrorBACKData[i].nErrorArea)
+					if(nErrorFristData[i].nErrorArea < nErrorClampData[i].nErrorArea && nErrorClampData[i].nErrorArea > nErrorBACKData[i].nErrorArea)
 					{
 						pThis->nRunInfo.ClampCount += 1;
 						pThis->nRunInfo.iClampErrorByType[nErrorClampData[i].nType] += 1;
 						pThis->nRunInfo.iErrorByType[nErrorClampData[i].nType] += 1;
 						pThis->nSendData[i] = nErrorClampData[i];
 					}
-					else if(nErrorFristData[i].nErrorArea <= nErrorBACKData[i].nErrorArea && nErrorClampData[i].nErrorArea <= nErrorBACKData[i].nErrorArea)
+					else if(nErrorFristData[i].nErrorArea < nErrorBACKData[i].nErrorArea && nErrorClampData[i].nErrorArea < nErrorBACKData[i].nErrorArea)
 					{
 						pThis->nRunInfo.RearCount += 1;
 						pThis->nRunInfo.iRearErrorByType[nErrorBACKData[i].nType] += 1;
 						pThis->nRunInfo.iErrorByType[nErrorBACKData[i].nType] += 1;
 						pThis->nSendData[i] = nErrorBACKData[i];
 					}
-					else if(nErrorFristData[i].nErrorArea >= nErrorClampData[i].nErrorArea && nErrorFristData[i].nErrorArea >= nErrorBACKData[i].nErrorArea)
+					else if(nErrorFristData[i].nErrorArea > nErrorClampData[i].nErrorArea && nErrorFristData[i].nErrorArea > nErrorBACKData[i].nErrorArea)
 					{
 						pThis->nRunInfo.FrontCount += 1;
 						pThis->nRunInfo.iFrontErrorByType[nErrorFristData[i].nType] += 1;
@@ -722,9 +704,9 @@ DWORD WINAPI MultiInterface::DataCountThread( void *arg )
 					pThis->nDataCount[i].pop_front();
 				}
 			}
-			//pThis->nCountLock.unlock();
 			Sleep(20);
 		}
+		Sleep(1);
 	}
 	return true;
 }
@@ -734,14 +716,12 @@ DWORD WINAPI MultiInterface::DataHanldThread( void *arg )
 	while (pThis->nOver)
 	{
 		QByteArray buffer;
-		//pThis->nDataLock.lock();
 		if(pThis->nDataList.count()>0)
 		{
 			buffer = pThis->nDataList.first();
 			pThis->nDataList.removeFirst();
 			pThis->CalculateData(buffer);
 		}
-		//pThis->nDataLock.unlock();
 		Sleep(20);
 	}
 	return true;
@@ -760,9 +740,7 @@ void MultiInterface::CalculateData(QByteArray buffer)
 			int nPlcTypeid = nSaveDataAddress[23];
 			nAllCheckNum = nSaveDataAddress[21];
 			nAllFailNum = nSaveDataAddress[22];
-			//Logfile->write(QString("Allcount:%1 , Failcount:%2").arg(nAllCheckNum).arg(nAllFailNum),CheckLog);
 			nWidgetCount->slots_updateCountInfo(nAllCheckNum,nAllFailNum,0);
-			//Logfile->write(QString("nplc = %1").arg(nPlcTypeid),CheckLog);
 			if(nPlcTypeid == -1)
 			{
 				emit sianal_WarnMessage(nPlcTypeid,NULL);
@@ -790,7 +768,6 @@ void MultiInterface::onServerConnected(QString IPAddress,bool nState)
 	{
 		ui.checkBox_3->setChecked(nState);
 	}
-
 }
 
 void MultiInterface::ClearCount(bool isChangeShift)
@@ -798,7 +775,7 @@ void MultiInterface::ClearCount(bool isChangeShift)
 	if(!isChangeShift)
 	{
 		if (QMessageBox::No == QMessageBox::question(this,tr("clear"),
-			tr("Are you sure to clear?"),
+			tr("Are you sure to clear?")+"\n"+tr("For Report statistical accuracy.")+"\n"+tr("Please make sure there are no bottles in the cabinet"),
 			QMessageBox::Yes | QMessageBox::No))	
 		{
 			return;

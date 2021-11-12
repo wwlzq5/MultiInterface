@@ -51,7 +51,7 @@ void widget_Alert::initConfig()
 	ui.tableView->horizontalHeader()->setResizeMode(0,QHeaderView::Fixed); 
 	ui.tableView->horizontalHeader()->setResizeMode(1,QHeaderView::Fixed);
 	ui.tableView->setColumnWidth(0,180); 
-	ui.tableView->setColumnWidth(1,250);
+	ui.tableView->setColumnWidth(1,500);
 
 	nErrorTimer = new QTimer();
 	nErrorTimer->setInterval(10000);

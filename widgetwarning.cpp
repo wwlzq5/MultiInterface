@@ -3,6 +3,10 @@
 #include <QApplication>
 #include <QLayout>
 #include <windows.h>
+
+#include "multiinterface.h"
+extern MultiInterface *pMainFrm;
+
 Widget_Warning::Widget_Warning(QWidget *parent)
 	: QWidget(parent)
 {
@@ -43,6 +47,7 @@ void Widget_Warning::Init()
 	QVBoxLayout *layoutMain = new QVBoxLayout(this);
 	layoutMain->addLayout(layoutBody);
 	layoutMain->setContentsMargins(0,0,0,0);
+	iWarningType = -2;
 }
 bool Widget_Warning::IsShowWarning()
 {
@@ -50,15 +55,29 @@ bool Widget_Warning::IsShowWarning()
 }
 void Widget_Warning::slot_ShowMessage(int warningType, QString warningInfo)
 {
+	if(iWarningType == warningType)
+	{
+		return;
+	}
+	iWarningType = iWarningType;
 	if(warningType == -1)
 	{
-		hide();
+		if(pMainFrm->nSheetPage == MAININTERFACE)
+		{
+			hide();
+		}else{
+			pMainFrm->SendBasicNet(SEVERS,"NULL");
+		}
 	}else{
 		labelWarningInfo->setText(warningInfo);
-		
 		QDesktopWidget* desktopWidget = QApplication::desktop();
 		move(desktopWidget->width()-400,desktopWidget->height()-300);
-		show();
+		if(pMainFrm->nSheetPage == MAININTERFACE)
+		{
+			show();
+		}else{
+			pMainFrm->SendBasicNet(SEVERS,warningInfo);
+		}
 	}
 }
 void Widget_Warning::slots_HideWidget()

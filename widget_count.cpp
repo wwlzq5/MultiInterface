@@ -510,7 +510,7 @@ void widget_count::slots_UpdateTable1(cErrorInfo pCountdates)
 		listItem.clear();
 	}
 	QList<QStandardItem*> items;
-	for (int i=1;i<pMainFrm->m_ErrorTypeInfo.iErrorTypeCount;i++)
+	for (int i=1;i<=pMainFrm->m_ErrorTypeInfo.iErrorTypeCount;i++)
 	{
 		items.clear();
 		int ErrorByType=pCountdates.GetErrorByTypeCount(i);
@@ -1262,7 +1262,7 @@ void ExportExcelThread::run()
 		//БъЬт
 		m_ExcelObj->SetTatilRow(row++);
 		QStringList dataList;
-		for (int k=1;k<pMainFrm->m_ErrorTypeInfo.iErrorTypeCount;k++)
+		for (int k=1;k<=pMainFrm->m_ErrorTypeInfo.iErrorTypeCount;k++)
 		{
 			int ErrorBytype=info.GetErrorByTypeCount(k);
 			if(ErrorBytype != 0)
