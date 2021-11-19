@@ -65,7 +65,6 @@ public:
 	void UpdateCountForShow(bool isFirst=false);
 	void SaveCountInfo();
 	void SaveToDatebase();
-	void DataAnalysis();
 	void mouseMoveEvent(QMouseEvent *event);
 	void mousePressEvent(QMouseEvent *event);
 	void SendBasicNet(StateEnum,QString);

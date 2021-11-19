@@ -188,7 +188,7 @@ void MultiInterface::InitConnect()
 	connect(this,SIGNAL(UpdateIOCard(int*,int)),this,SLOT(slots_OnUpdateIOCard(int*,int)));
 
 	nConnectState = new QTimer;
-	nConnectState->setInterval(10000);
+	nConnectState->setInterval(60000);
 	connect(nConnectState,SIGNAL(timeout()),this,SLOT(slots_ConnectState()));
 	nConnectState->start();
 
@@ -412,26 +412,27 @@ void MultiInterface::slots_ConnectState()
 {
 	for(int i=0;i<3;i++)
 	{
-		//心跳机制，判断是否断开连接
-		int timeLength = QTime::currentTime().second();
 		if(IPAddress[i].nstate)
 		{
-			if((timeLength-IPAddress[i].startTime+60)%60 >15)
+			//心跳机制，判断是否断开连接
+			int timeLength = QTime::currentTime().minute();
+			if((timeLength-IPAddress[i].startTime+60)%60 >5)
 			{
 				onServerConnected(IPAddress[i].ipAddress,0);
 				IPAddress[i].nstate = false;
+				Logfile->write(QString("%1-lost connect %2--%3!").arg(i).arg(timeLength).arg(IPAddress[i].startTime),OperationLog);
 			}else{
 				onServerConnected(IPAddress[i].ipAddress,1);
 			}
 		}
 	}
 	//没人操作锁屏
-	n_EndTime = QDateTime::currentDateTime();
+	/*n_EndTime = QDateTime::currentDateTime();
 	if( n_StartTime.secsTo(n_EndTime) > 5*60)
 	{
-		//nUserWidget->ShowInterfance();
-		Logfile->write("Lock Interface!",OperationLog);
-	}
+	nUserWidget->ShowInterfance();
+	Logfile->write("Lock Interface!",OperationLog);
+	}*/
 }
 void MultiInterface::SaveCountInfo()
 {
@@ -551,15 +552,21 @@ void MultiInterface::SaveToDatebase()
 	return;
 }
 
-void MultiInterface::DataAnalysis()
-{
-	
-}
-
 void MultiInterface::ServerNewConnection()
 {
 	QTcpSocket* tcp = m_temptcpServer->nextPendingConnection(); //获取新的客户端信息
-	onServerConnected(tcp->peerAddress().toString(),1);
+	if(tcp->peerAddress().toString() == IP1)
+	{
+		ui.checkBox->setChecked(true);
+	}
+	else if(tcp->peerAddress().toString() == IP2)
+	{
+		ui.checkBox_2->setChecked(true);
+	}
+	else if(tcp->peerAddress().toString() == IP3)
+	{
+		ui.checkBox_3->setChecked(true);
+	}
 	connect(tcp, SIGNAL(readyRead()), this, SLOT(onServerDataReady()));
 }
 void MultiInterface::onServerDataReady()
@@ -582,16 +589,17 @@ void MultiInterface::onServerDataReady()
 		}
 	}else if(((MyStruct*)buffer.data())->nState == CONNECT)//心跳包，用于判断是否掉线
 	{
-		QTime nTime =  QTime::currentTime();
-		for(int i=0;i<3;i++)
+		int nGetDataSize = sizeof(MyStruct);
+		if(buffer.size() == nGetDataSize)
 		{
-			if(m_tcpSocket->peerAddress().toString() == IPAddress[i].ipAddress)
+			QTime nTime =  QTime::currentTime();
+			for(int i=0;i<3;i++)
 			{
-				IPAddress[i].nstate = true;
-				IPAddress[i].startTime = nTime.second();
-				MyStruct temp;
-				temp.nState = CONNECT;
-				m_tcpSocket->write((char*)&temp,sizeof(MyStruct));
+				if(m_tcpSocket->peerAddress().toString() == IPAddress[i].ipAddress)
+				{
+					IPAddress[i].nstate = true;
+					IPAddress[i].startTime = nTime.minute();
+				}
 			}
 		}
 	}
