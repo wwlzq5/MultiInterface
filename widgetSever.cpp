@@ -26,7 +26,6 @@ VNC_widget::VNC_widget(QWidget *parent/*=0*/)
 {
 	setWindowFlags(Qt::FramelessWindowHint);
 	setWindowState(Qt::WindowMaximized);
-
 	BadControl^ nVNCCtrl1 = gcnew BadControl();
 
 	GCHandle pHandel1= GCHandle::Alloc(nVNCCtrl1);
@@ -43,7 +42,6 @@ VNC_widget::~VNC_widget()
 {
 
 }
-
 bool VNC_widget::Connect(int index)
 {
 	if (index>3 || index < 0)

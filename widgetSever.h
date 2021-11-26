@@ -20,7 +20,6 @@ public:
 
 	void ShowWidget(int index);
 	void CloseWidget();
-
 private slots:
 	void Show();
 

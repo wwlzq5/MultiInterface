@@ -15,22 +15,7 @@ MultiInterface::MultiInterface(QWidget *parent)
 	InitConfig();
 	InitSocket();
 	InitConnect();
-
 	m_Datebase =new DataBase(AppPaths.AppPath);
-
-	//nWidgetCount = new widget_count;
-
-// 	QPalette palette;
-// 	palette.setBrush(QPalette::Window, QBrush(Qt::white));
-// 	ui.stackedWidget->setPalette(palette);
-// 	ui.stackedWidget->setAutoFillBackground(true);
-	//ui.stackedWidget->addWidget(nWidgetCount);
-
-	//ui.stackedWidget->setCurrentWidget(nWidgetCount);
-// 	QHBoxLayout * nBoxLayout = new QHBoxLayout(ui.widget_Count);
-// 	ui.widget_Count->setLayout(nBoxLayout);
-// 	nBoxLayout->addWidget(nWidgetCount);
-// 	nBoxLayout->setMargin(0);
 	mVNC_window=new VNC_widget();
 	for(int i=0;i<256;i++)
 	{
@@ -38,8 +23,6 @@ MultiInterface::MultiInterface(QWidget *parent)
 		nSendData[i].nErrorArea = 0;
 		nSendData[i].nType = 0;
 	}
-	
-
 	connect(nWidgetCount ,SIGNAL(updateRecordSet()),this,SLOT(slots_UpdateRecordSet()));
 	connect(nWidgetCount ,SIGNAL(updateShiftSet()),this,SLOT(slots_UpdateShiftSet()));
 
@@ -50,21 +33,7 @@ MultiInterface::MultiInterface(QWidget *parent)
 	timerSaveList->start();
 
 	m_Datebase->queryLastData(nAllCheckNum,nAllFailNum,nRunInfo);
-
-// 	nAllCheckNum = 200;
-// 	nAllFailNum = 147;
-// 	nRunInfo.iAllCount = 200;
-// 	for(int i=1;i<50;i++)
-// 	{
-// 		nRunInfo.iFrontErrorByType[i] = 1;
-// 		nRunInfo.iClampErrorByType[i] = 1;
-// 		nRunInfo.iRearErrorByType[i]  = 1;
-// 	}
-
 	UpdateCountForShow(true);
-
-// 	SaveToDatebase();
-// 	SaveCountInfo();
 }
 
 MultiInterface::~MultiInterface()
@@ -73,7 +42,6 @@ MultiInterface::~MultiInterface()
 void MultiInterface::closeEvent(QCloseEvent *event)
 {
 	nOver  = false;
-	//delete nUserWidget;
 	delete nWarning;
 	delete nAlert;
 	delete nWidgetMode;
@@ -152,7 +120,8 @@ void MultiInterface::InitConfig()
 	IPAddress<<nIptemp;
 	nSheetPage = MAININTERFACE;
 	
-	n_StartTime =QDateTime::currentDateTime();
+	n_StartTime = QDateTime::currentDateTime();
+	GetCursorPos(&gcPosition);
 }
 void MultiInterface::InitSocket()
 {
@@ -188,9 +157,13 @@ void MultiInterface::InitConnect()
 	connect(this,SIGNAL(UpdateIOCard(int*,int)),this,SLOT(slots_OnUpdateIOCard(int*,int)));
 
 	nConnectState = new QTimer;
-	nConnectState->setInterval(60000);
+	nConnectState->setInterval(60*1000);
 	connect(nConnectState,SIGNAL(timeout()),this,SLOT(slots_ConnectState()));
 	nConnectState->start();
+	nScreenTime = new QTimer;
+	nScreenTime->setInterval(60*1000*5);//5分钟没人操作就关闭
+	connect(nScreenTime,SIGNAL(timeout()),this,SLOT(slots_CloseConnect()));
+	nScreenTime->start();
 
 // 	nUserWidget = new UserWidget();
 // 	connect(nUserWidget,SIGNAL(signal_TimeLogin(QTime)),this,SLOT(slots_TimeLogin(QTime)));
@@ -229,10 +202,7 @@ void MultiInterface::InitConnect()
 	signal_mapper->setMapping(ui.pushButton_2,5);
 	signal_mapper->setMapping(ui.pushButton_Mode,6);
 	signal_mapper->setMapping(ui.pushButton_home,7);
-
 	connect(signal_mapper, SIGNAL(mapped(int)), this, SLOT(slots_clickAccont(int)));
-
-
 }
 void MultiInterface::ChangeVncState(int nTest)
 {
@@ -339,7 +309,6 @@ void MultiInterface::slots_SaveCountBytime()
 		else
 			isSave =false;
 	}
-
 }
 
 void MultiInterface::slots_SaveCountByShift()
@@ -400,13 +369,18 @@ void MultiInterface::slots_UpdateShiftSet()
 	SysConfigInfo.isAutoClear = SystemConfigSet.value("System/isAutoClear",true).toBool();
 }
 
-void MultiInterface::mouseMoveEvent(QMouseEvent *event)
+void MultiInterface::slots_CloseConnect()
 {
-	n_StartTime=QDateTime::currentDateTime();
-}
-void MultiInterface::mousePressEvent(QMouseEvent *event)
-{
-	n_StartTime=QDateTime::currentDateTime();
+	POINT tgcPosition;
+	GetCursorPos( &tgcPosition );
+	if((tgcPosition.x == gcPosition.x) && (tgcPosition.y == gcPosition.y))
+	{
+		//关闭远程界面
+		mVNC_window->CloseWidget();
+	}else{
+		gcPosition.x = tgcPosition.x;
+		gcPosition.y = tgcPosition.y;
+	}
 }
 void MultiInterface::slots_ConnectState()
 {
@@ -426,13 +400,6 @@ void MultiInterface::slots_ConnectState()
 			}
 		}
 	}
-	//没人操作锁屏
-	/*n_EndTime = QDateTime::currentDateTime();
-	if( n_StartTime.secsTo(n_EndTime) > 5*60)
-	{
-	nUserWidget->ShowInterfance();
-	Logfile->write("Lock Interface!",OperationLog);
-	}*/
 }
 void MultiInterface::SaveCountInfo()
 {
@@ -568,6 +535,27 @@ void MultiInterface::ServerNewConnection()
 		ui.checkBox_3->setChecked(true);
 	}
 	connect(tcp, SIGNAL(readyRead()), this, SLOT(onServerDataReady()));
+	connect(tcp,SIGNAL(stateChanged(QAbstractSocket::SocketState)),this,SLOT(slot_StateChanged(QAbstractSocket::SocketState)));
+}
+void MultiInterface::slot_StateChanged(QAbstractSocket::SocketState state)
+{
+	switch(state)
+	{
+	case QAbstractSocket::ConnectedState:
+		Logfile->write("ConnectedState",CheckLog);
+		break;
+	case QAbstractSocket::ConnectingState:
+		Logfile->write("ConnectingState",CheckLog);
+		break;
+	case QAbstractSocket::ClosingState:
+		Logfile->write("ClosingState",CheckLog);
+		break;
+	case QAbstractSocket::UnconnectedState:
+		Logfile->write("UnconnectedState",CheckLog);
+		break;
+	default:
+		break;
+	}
 }
 void MultiInterface::onServerDataReady()
 {
@@ -590,28 +578,36 @@ void MultiInterface::onServerDataReady()
 	}else if(((MyStruct*)buffer.data())->nState == CONNECT)//心跳包，用于判断是否掉线
 	{
 		int nGetDataSize = sizeof(MyStruct);
-		if(buffer.size() == nGetDataSize)
+		QTime nTime =  QTime::currentTime();
+		if(buffer.size() == nGetDataSize  && ((MyStruct*)buffer.data())->nUnit == LEADING)
 		{
-			QTime nTime =  QTime::currentTime();
-			for(int i=0;i<3;i++)
-			{
-				if(m_tcpSocket->peerAddress().toString() == IPAddress[i].ipAddress)
-				{
-					IPAddress[i].nstate = true;
-					IPAddress[i].startTime = nTime.minute();
-				}
-			}
+			IPAddress[0].nstate = true;
+			IPAddress[0].startTime = nTime.minute();
+		}else if(buffer.size() == nGetDataSize && ((MyStruct*)buffer.data())->nUnit == CLAMPING)
+		{
+			IPAddress[1].nstate = true;
+			IPAddress[1].startTime = nTime.minute();
+		}else if(buffer.size() == nGetDataSize && ((MyStruct*)buffer.data())->nUnit == BACKING)
+		{
+			IPAddress[2].nstate = true;
+			IPAddress[2].startTime = nTime.minute();
 		}
 	}
 	else if(((MyStruct*)buffer.data())->nState == LOCKSCREEN)
 	{
-		n_StartTime=QDateTime::currentDateTime();
+		//n_StartTime=QDateTime::currentDateTime();
 	}
 	else if(((MyStruct*)buffer.data())->nState == ALERT)//接口卡和错误显示
 	{
-		if(buffer.size() == sizeof(MyStruct)+24*sizeof(int))
+		if(buffer.size() == sizeof(MyStruct))
 		{
-			nDataList.push_back(buffer);
+			int nTypeId = ((MyStruct*)buffer.data())->nCount;
+			if( nTypeId == -1)
+			{
+				emit sianal_WarnMessage(nTypeId,NULL);
+			}else{
+				emit sianal_WarnMessage(nTypeId,m_PLCAlertType.at(nTypeId));
+			}
 		}
 	}else if(((MyStruct*)buffer.data())->nState == SEVERS)//从第四块接口卡获取过检总数和踢废总数
 	{

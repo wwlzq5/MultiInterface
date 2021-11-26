@@ -65,8 +65,6 @@ public:
 	void UpdateCountForShow(bool isFirst=false);
 	void SaveCountInfo();
 	void SaveToDatebase();
-	void mouseMoveEvent(QMouseEvent *event);
-	void mousePressEvent(QMouseEvent *event);
 	void SendBasicNet(StateEnum,QString);
 	void ChangeVncState(int);
 
@@ -89,6 +87,8 @@ public slots:
 	void slots_SaveCountByShift();
 	void slots_UpdateRecordSet();
 	void slots_UpdateShiftSet();
+	void slots_CloseConnect();
+	void slot_StateChanged(QAbstractSocket::SocketState);
 public:
 	static DWORD WINAPI DataHanldThread( void *arg );
 	static DWORD WINAPI DataCountThread( void *arg );
@@ -121,9 +121,10 @@ public:
 	int nAllCheckNum;
 	int nAllFailNum;
 	QDateTime n_StartTime;
-	QDateTime n_EndTime;
+	QTimer *nScreenTime;
 	QTimer *timerSaveList;
 	int currentShift;
+	POINT gcPosition;
 private:
 	Ui::MultiInterfaceClass ui;
 };
