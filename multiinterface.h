@@ -75,6 +75,8 @@ public:
 signals:
 	void sianal_WarnMessage(int,QString);
 	void UpdateIOCard(int*,int);
+	void sianal_updateCountInfo(int,int,float);
+	void sianal_UpdateTable1(cErrorInfo);
 public slots:
 	void slots_ModeState(StateEnum,QString);
 	void slots_clickAccont(int);

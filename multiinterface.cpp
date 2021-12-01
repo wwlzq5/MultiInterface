@@ -175,14 +175,16 @@ void MultiInterface::InitConnect()
 	
 	nWidgetMode = new widget_Mode();
 	connect(nWidgetMode,SIGNAL(signal_ModeState(StateEnum,QString)),this,SLOT(slots_ModeState(StateEnum,QString)));
+	
 
 	nWidgetCount = new widget_count;
 	ui.stackedWidget->addWidget(nWidgetCount);
 	ui.stackedWidget->addWidget(nIOprence);
 	ui.stackedWidget->addWidget(nAlert);
 	ui.stackedWidget->addWidget(nWidgetMode);
-
 	ui.stackedWidget->setCurrentWidget(nWidgetCount);
+	connect(this,SIGNAL(sianal_updateCountInfo(int,int,float)),nWidgetMode,SLOT(slots_updateCountInfo(int,int,float)));
+	connect(this,SIGNAL(sianal_UpdateTable1(cErrorInfo)),nWidgetMode,SLOT(slots_UpdateTable1(cErrorInfo)));
 
 	signal_mapper = new QSignalMapper(this);
 	connect(ui.pushButton_open1,SIGNAL(clicked()),signal_mapper,SLOT(map()));
@@ -376,6 +378,7 @@ void MultiInterface::slots_CloseConnect()
 	if((tgcPosition.x == gcPosition.x) && (tgcPosition.y == gcPosition.y))
 	{
 		//关闭远程界面
+		Logfile->write(QString("Auto disconnect!"),OperationLog);
 		mVNC_window->CloseWidget();
 	}else{
 		gcPosition.x = tgcPosition.x;
@@ -599,7 +602,7 @@ void MultiInterface::onServerDataReady()
 	}
 	else if(((MyStruct*)buffer.data())->nState == ALERT)//接口卡和错误显示
 	{
-		if(buffer.size() == sizeof(MyStruct))
+		/*if(buffer.size() == sizeof(MyStruct))
 		{
 			int nTypeId = ((MyStruct*)buffer.data())->nCount;
 			if( nTypeId == -1)
@@ -608,6 +611,10 @@ void MultiInterface::onServerDataReady()
 			}else{
 				emit sianal_WarnMessage(nTypeId,m_PLCAlertType.at(nTypeId));
 			}
+		}*/
+		if(buffer.size() == sizeof(MyStruct)+24*sizeof(int))
+		{
+			nDataList.push_back(buffer);
 		}
 	}else if(((MyStruct*)buffer.data())->nState == SEVERS)//从第四块接口卡获取过检总数和踢废总数
 	{
@@ -744,7 +751,7 @@ void MultiInterface::CalculateData(QByteArray buffer)
 			int nPlcTypeid = nSaveDataAddress[23];
 			nAllCheckNum = nSaveDataAddress[21];
 			nAllFailNum = nSaveDataAddress[22];
-			nWidgetCount->slots_updateCountInfo(nAllCheckNum,nAllFailNum,0);
+			emit sianal_updateCountInfo(nAllCheckNum,nAllFailNum,0);
 			if(nPlcTypeid == -1)
 			{
 				emit sianal_WarnMessage(nPlcTypeid,NULL);
@@ -810,8 +817,9 @@ void MultiInterface::ClearCount(bool isChangeShift)
 
 void MultiInterface::UpdateCountForShow(bool isFirst)
 {
-	nWidgetCount->slots_updateCountInfo(nAllCheckNum,nAllFailNum,0);
-	nWidgetCount->slots_UpdateTable1(nRunInfo);
+	emit sianal_updateCountInfo(nAllCheckNum,nAllFailNum,0);
+	emit sianal_UpdateTable1(nRunInfo);
+	
 	if (!isFirst)
 	{
 		m_Datebase->insertLastData(nAllCheckNum,nAllFailNum,nRunInfo);

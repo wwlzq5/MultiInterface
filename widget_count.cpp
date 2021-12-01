@@ -136,7 +136,7 @@ void widget_count::init()
 
 	//…Ë÷√countInfoƒ¨»œ÷µ
 	slot_saveRecordCancel_clicked();
-;	slot_shiftCancel_clicked();
+	slot_shiftCancel_clicked();
 
 	connect(buttonTurn,SIGNAL(clicked()),this,SLOT(slots_turnPage()));
 	connect(ui.pushButton_saveRecordOK,SIGNAL(clicked()),this,SLOT(slot_saveRecordOK_clicked()));
@@ -151,34 +151,6 @@ void widget_count::init()
 	connect(ui.pushButton_Search,SIGNAL(clicked()),this,SLOT(slot_SearchShift_clicked()));
 
 	ExportThread=new ExportExcelThread(this);
-
-/*
-	QList<cErrorTypeCountInfo > pInfos;
-	for (int i=0;i<10;i++)
-	{
-		cErrorTypeCountInfo info;
-		info.iErrorTxt = QString::number(i);
-		info.iFrontCount=i;
-		info.iClampCount=i;
-		info.iRearCount=i;
-		info.iCheckCount=100;
-		info.iErrorFailCount=i+1;
-		info.iFailCount=55;
-		pInfos<<info;
-	}
-	slots_UpdateTable1(pInfos);
-	slots_ShowPieImage1(pInfos);
-
-	QList<cErrorCountbyTime> pCountdates;
-	for (int i=0;i<10;i++)
-	{
-		cErrorCountbyTime info;
-		info.iTime = 202107271600;
-		pCountdates<<info;
-	}
-	slots_UpdateTable2(pCountdates);
-	slots_ShowShiftIamge();
-*/
 }
 
 DWORD widget_count::GetProcessIdFromName(const char*processName)    
