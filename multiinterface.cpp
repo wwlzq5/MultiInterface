@@ -183,8 +183,8 @@ void MultiInterface::InitConnect()
 	ui.stackedWidget->addWidget(nAlert);
 	ui.stackedWidget->addWidget(nWidgetMode);
 	ui.stackedWidget->setCurrentWidget(nWidgetCount);
-	connect(this,SIGNAL(sianal_updateCountInfo(int,int,float)),nWidgetMode,SLOT(slots_updateCountInfo(int,int,float)));
-	connect(this,SIGNAL(sianal_UpdateTable1(cErrorInfo)),nWidgetMode,SLOT(slots_UpdateTable1(cErrorInfo)));
+	connect(this,SIGNAL(sianal_updateCountInfo(int,int,float)),nWidgetCount,SLOT(slots_updateCountInfo(int,int,float)));
+	connect(this,SIGNAL(sianal_UpdateTable1(cErrorInfo)),nWidgetCount,SLOT(slots_UpdateTable1(cErrorInfo)));
 
 	signal_mapper = new QSignalMapper(this);
 	connect(ui.pushButton_open1,SIGNAL(clicked()),signal_mapper,SLOT(map()));
