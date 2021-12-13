@@ -115,23 +115,23 @@
 <context>
     <name>ExportExcelThread</name>
     <message>
-        <location filename="widget_count.cpp" line="1208"/>
-        <location filename="widget_count.cpp" line="1214"/>
+        <location filename="widget_count.cpp" line="1180"/>
+        <location filename="widget_count.cpp" line="1186"/>
         <source>Error</source>
         <translation>错误</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="1208"/>
+        <location filename="widget_count.cpp" line="1180"/>
         <source>Failed to create Excel object, please install Microsoft Excel.</source>
         <translation>创建Excel表失败，请安装Microsoft Excel.</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="1214"/>
+        <location filename="widget_count.cpp" line="1186"/>
         <source>Get Microsoft Excel workbook error,Please check that Microsoft Excel is installed correctly.</source>
         <translation>获取Microsoft Excel工作薄失败，请检测Microsoft Excel是否安装正确。</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="1254"/>
+        <location filename="widget_count.cpp" line="1226"/>
         <source>time: %1
 All Count: %2   Fail Count: %3   Fail Rate: %4
 Front: %5   Clamp: %6   Rear: %7</source>
@@ -140,7 +140,7 @@ Front: %5   Clamp: %6   Rear: %7</source>
 前壁: %5   夹持: %6   后壁: %7</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="1282"/>
+        <location filename="widget_count.cpp" line="1254"/>
         <source>SUM</source>
         <translation>总数</translation>
     </message>
@@ -260,52 +260,52 @@ Front: %5   Clamp: %6   Rear: %7</source>
 <context>
     <name>MultiInterface</name>
     <message>
-        <location filename="multiinterface.cpp" line="99"/>
+        <location filename="multiinterface.cpp" line="67"/>
         <source>Good</source>
         <translation>正常</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="177"/>
+        <location filename="multiinterface.cpp" line="147"/>
         <source>IOData</source>
         <translation>接口卡数据</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="268"/>
+        <location filename="multiinterface.cpp" line="269"/>
         <source>into Front Interface</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="272"/>
+        <location filename="multiinterface.cpp" line="274"/>
         <source>into Clamping Interface</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="276"/>
+        <location filename="multiinterface.cpp" line="279"/>
         <source>into Backing Interface</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="282"/>
+        <location filename="multiinterface.cpp" line="283"/>
         <source>into IOCard Interface</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="288"/>
+        <location filename="multiinterface.cpp" line="287"/>
         <source>into Alert Interface</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="297"/>
+        <location filename="multiinterface.cpp" line="291"/>
         <source>into Clear Interface</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="303"/>
+        <location filename="multiinterface.cpp" line="295"/>
         <source>into Mode Interface</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="307"/>
+        <location filename="multiinterface.cpp" line="299"/>
         <source>into Count Interface</source>
         <translation></translation>
     </message>
@@ -318,77 +318,82 @@ Front: %5   Clamp: %6   Rear: %7</source>
         <translation type="obsolete">确认重连吗？</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="480"/>
+        <location filename="multiinterface.cpp" line="303"/>
+        <source>into lock Interface</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="multiinterface.cpp" line="473"/>
         <source>Time:  %1:%2:%3</source>
         <translation>时间: %1:%2:%3</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="481"/>
+        <location filename="multiinterface.cpp" line="474"/>
         <source>All Count:  %1</source>
         <translation>过检总数:  %1</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="482"/>
+        <location filename="multiinterface.cpp" line="475"/>
         <source>Fail Count:  %1</source>
         <translation>踢废数:  %1</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="483"/>
+        <location filename="multiinterface.cpp" line="476"/>
         <source>Fail Rate:  %1%</source>
         <translation>踢废率:  %1%</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="485"/>
+        <location filename="multiinterface.cpp" line="478"/>
         <source>Front Count:  %1</source>
         <translation>前壁:  %1</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="486"/>
+        <location filename="multiinterface.cpp" line="479"/>
         <source>Clamp Count:  %1</source>
         <translation>夹持:  %1</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="487"/>
+        <location filename="multiinterface.cpp" line="480"/>
         <source>Rear Count:  %1</source>
         <translation>后壁:  %1</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="494"/>
+        <location filename="multiinterface.cpp" line="487"/>
         <source>Results</source>
         <translation>统计</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="496"/>
+        <location filename="multiinterface.cpp" line="489"/>
         <source>front</source>
         <translation>前壁</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="497"/>
+        <location filename="multiinterface.cpp" line="490"/>
         <source>clamp</source>
         <translation>夹持</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="498"/>
+        <location filename="multiinterface.cpp" line="491"/>
         <source>rear</source>
         <translation>后壁</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="800"/>
+        <location filename="multiinterface.cpp" line="819"/>
         <source>clear</source>
         <translation>计数清零</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="801"/>
+        <location filename="multiinterface.cpp" line="820"/>
         <source>Are you sure to clear?</source>
         <translation>是否清除计数？</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="801"/>
+        <location filename="multiinterface.cpp" line="820"/>
         <source>For Report statistical accuracy.</source>
-        <translation type="unfinished">为了统计报表的准确性.</translation>
+        <translation type="unfinished">为了统计报表的准确性。</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="801"/>
+        <location filename="multiinterface.cpp" line="820"/>
         <source>Please make sure there are no bottles in the cabinet</source>
         <translation type="unfinished">请确认清零时没有瓶子在机柜里</translation>
     </message>
@@ -409,7 +414,7 @@ Front: %5   Clamp: %6   Rear: %7</source>
         <translation type="obsolete">错误类型</translation>
     </message>
     <message>
-        <location filename="multiinterface.cpp" line="495"/>
+        <location filename="multiinterface.cpp" line="488"/>
         <source>Count</source>
         <translation>计数</translation>
     </message>
@@ -434,17 +439,17 @@ Front: %5   Clamp: %6   Rear: %7</source>
         <translation type="obsolete">打开报表</translation>
     </message>
     <message>
-        <location filename="multiinterface.ui" line="198"/>
+        <location filename="multiinterface.ui" line="205"/>
         <source>Front state</source>
         <translation>前壁状态</translation>
     </message>
     <message>
-        <location filename="multiinterface.ui" line="212"/>
+        <location filename="multiinterface.ui" line="219"/>
         <source>Clamp state</source>
         <translation>夹持状态</translation>
     </message>
     <message>
-        <location filename="multiinterface.ui" line="226"/>
+        <location filename="multiinterface.ui" line="233"/>
         <source>Rear state</source>
         <translation>后壁状态</translation>
     </message>
@@ -478,6 +483,11 @@ Front: %5   Clamp: %6   Rear: %7</source>
         <location filename="multiinterface.ui" line="176"/>
         <source>Product Mode</source>
         <translation>模板设置</translation>
+    </message>
+    <message>
+        <location filename="multiinterface.ui" line="183"/>
+        <source>System Lock</source>
+        <translation type="unfinished">锁定</translation>
     </message>
     <message>
         <source>Contact Network</source>
@@ -580,23 +590,23 @@ Front: %5   Clamp: %6   Rear: %7</source>
     </message>
     <message>
         <location filename="widgetUser.cpp" line="115"/>
-        <location filename="widgetUser.cpp" line="156"/>
+        <location filename="widgetUser.cpp" line="165"/>
         <source>Error</source>
         <translation>错误</translation>
     </message>
     <message>
         <location filename="widgetUser.cpp" line="115"/>
-        <location filename="widgetUser.cpp" line="156"/>
+        <location filename="widgetUser.cpp" line="165"/>
         <source>Wrong password</source>
         <translation>密码错误</translation>
     </message>
     <message>
-        <location filename="widgetUser.cpp" line="153"/>
+        <location filename="widgetUser.cpp" line="162"/>
         <source>Information</source>
         <translation>提示信息</translation>
     </message>
     <message>
-        <location filename="widgetUser.cpp" line="153"/>
+        <location filename="widgetUser.cpp" line="162"/>
         <source>The new password set successfully</source>
         <translation>新密码设置成功</translation>
     </message>
@@ -619,7 +629,7 @@ Front: %5   Clamp: %6   Rear: %7</source>
 <context>
     <name>Widget_Warning</name>
     <message>
-        <location filename="widgetwarning.cpp" line="19"/>
+        <location filename="widgetwarning.cpp" line="23"/>
         <source>Alert Info!</source>
         <translation></translation>
     </message>
@@ -1012,7 +1022,7 @@ Front: %5   Clamp: %6   Rear: %7</source>
     </message>
     <message>
         <location filename="widget_count.cpp" line="76"/>
-        <location filename="widget_count.cpp" line="496"/>
+        <location filename="widget_count.cpp" line="468"/>
         <source>Reject Rate</source>
         <translation>踢废率</translation>
     </message>
@@ -1077,96 +1087,96 @@ Front: %5   Clamp: %6   Rear: %7</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="377"/>
-        <location filename="widget_count.cpp" line="398"/>
-        <location filename="widget_count.cpp" line="404"/>
+        <location filename="widget_count.cpp" line="349"/>
+        <location filename="widget_count.cpp" line="370"/>
+        <location filename="widget_count.cpp" line="376"/>
         <source>Information</source>
         <translation>提示信息</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="377"/>
-        <location filename="widget_count.cpp" line="398"/>
+        <location filename="widget_count.cpp" line="349"/>
+        <location filename="widget_count.cpp" line="370"/>
         <source>No record in select date!</source>
         <translation>选择日期没有记录！</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="404"/>
+        <location filename="widget_count.cpp" line="376"/>
         <source>Deleting [%1] fail!</source>
         <translation>删除 [%1] 失败!</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="434"/>
+        <location filename="widget_count.cpp" line="406"/>
         <source>shift1</source>
         <translation>班次1</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="440"/>
+        <location filename="widget_count.cpp" line="412"/>
         <source>shift2</source>
         <translation>班次2</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="447"/>
+        <location filename="widget_count.cpp" line="419"/>
         <source>shift3</source>
         <translation>班次3</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="454"/>
+        <location filename="widget_count.cpp" line="426"/>
         <source>AllShift</source>
         <translation>总班次</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="481"/>
+        <location filename="widget_count.cpp" line="453"/>
         <source>Defect Count - %1</source>
         <translation>缺陷统计 - %1 </translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="489"/>
+        <location filename="widget_count.cpp" line="461"/>
         <source>Product Number</source>
         <translation>过检总数</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="490"/>
+        <location filename="widget_count.cpp" line="462"/>
         <source>Reject Number</source>
         <translation>踢废总数</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="500"/>
+        <location filename="widget_count.cpp" line="472"/>
         <source>Model Rate</source>
         <translation>读模率</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="662"/>
-        <location filename="widget_count.cpp" line="731"/>
+        <location filename="widget_count.cpp" line="634"/>
+        <location filename="widget_count.cpp" line="703"/>
         <source>Other:</source>
         <translation>其他：</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="756"/>
+        <location filename="widget_count.cpp" line="728"/>
         <source>All Detect Number</source>
         <translation>检测总数</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="760"/>
+        <location filename="widget_count.cpp" line="732"/>
         <source>Failure Number</source>
         <translation>踢废总数</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="887"/>
+        <location filename="widget_count.cpp" line="859"/>
         <source>Time(Hour)</source>
         <translation>时间（小时）</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="918"/>
+        <location filename="widget_count.cpp" line="890"/>
         <source>Failure Number Table(Ps)</source>
         <translation>踢废表（Ps）</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="959"/>
+        <location filename="widget_count.cpp" line="931"/>
         <source>Single Shift All Detect Number</source>
         <translation>班次过检总数</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="963"/>
+        <location filename="widget_count.cpp" line="935"/>
         <source>Single Shift Failure Number</source>
         <translation>班次踢废总数</translation>
     </message>
@@ -1175,27 +1185,27 @@ Front: %5   Clamp: %6   Rear: %7</source>
         <translation type="obsolete">班次踢废率</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="985"/>
+        <location filename="widget_count.cpp" line="957"/>
         <source>Shift1</source>
         <translation>班次1</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="985"/>
+        <location filename="widget_count.cpp" line="957"/>
         <source>Shift2</source>
         <translation>班次2</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="985"/>
+        <location filename="widget_count.cpp" line="957"/>
         <source>Shift3</source>
         <translation>班次3</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="1000"/>
+        <location filename="widget_count.cpp" line="972"/>
         <source>Shift(1,2,3)</source>
         <translation>班次(1,2,3)</translation>
     </message>
     <message>
-        <location filename="widget_count.cpp" line="1056"/>
+        <location filename="widget_count.cpp" line="1028"/>
         <source>Shift Failure Number Table(Ps)</source>
         <translation>班次缺陷统计</translation>
     </message>

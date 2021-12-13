@@ -84,13 +84,13 @@ public slots:
 	void onServerDataReady();
 	void slots_ConnectState();
 	void slots_OnUpdateIOCard(int*,int);
-	void slots_TimeLogin(QTime);
 	void slots_SaveCountBytime();
 	void slots_SaveCountByShift();
 	void slots_UpdateRecordSet();
 	void slots_UpdateShiftSet();
 	void slots_CloseConnect();
 	void slot_StateChanged(QAbstractSocket::SocketState);
+	void slots_loginState(int);
 public:
 	static DWORD WINAPI DataHanldThread( void *arg );
 	static DWORD WINAPI DataCountThread( void *arg );
@@ -110,7 +110,7 @@ public:
 	IOCardClass* nIOCard[3];
 	CLogFile* Logfile;
 	QWidget * nIOprence;
-	//UserWidget* nUserWidget;
+	UserWidget* nUserWidget;
 	Widget_Warning* nWarning;
 	widget_Alert* nAlert;
 	widget_count* nWidgetCount;

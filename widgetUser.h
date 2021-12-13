@@ -21,9 +21,9 @@ public:
 	QStringList strPasswordList;
 	QList<int> nPermissionsList;
 signals:
-	void signal_TimeLogin(QTime);
+	void signal_LoginState(int);
 private:
-	int iSizeType;
+	int nPermission;
 	QString strUserName;
 	QString PassWord;
 	QString strPassWordUser;

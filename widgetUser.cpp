@@ -10,7 +10,7 @@ UserWidget::UserWidget(QWidget *parent)
 	ui.lineEdit_passWord2->setEchoMode(QLineEdit::Password); 
 	ui.lineEdit_newPassWord->setEchoMode(QLineEdit::Password); 
 	ui.pushButton_login->setShortcut( QKeySequence::InsertParagraphSeparator );
-	iSizeType = 0;
+	nPermission = 0;
 	iUserPerm = true;
 	initial();
 	QPixmap pixmap = QPixmap(":/MultiInterface/NOLOGIN");
@@ -118,7 +118,16 @@ void UserWidget::slots_login()
 	ui.lineEdit_passWord->clear();
 	hide();
 	iUserPerm = true;
-	emit signal_TimeLogin(QTime::currentTime());
+	if(strUserName == "Admin")
+	{
+		nPermission = 1;
+	}else if(strUserName == "daheng")
+	{
+		nPermission = 2;
+	}else{
+		nPermission = 3;
+	}
+	emit signal_LoginState(nPermission);
 }
 void UserWidget::slots_changePassWrod()
 {

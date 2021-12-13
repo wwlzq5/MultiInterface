@@ -133,6 +133,7 @@ void MultiInterface::InitSocket()
 }
 void MultiInterface::InitConnect()
 {
+	qRegisterMetaType<cErrorInfo>("cErrorInfo"); 
 	ui.checkBox->setEnabled(false);
 	ui.checkBox_2->setEnabled(false);
 	ui.checkBox_3->setEnabled(false);
@@ -165,8 +166,8 @@ void MultiInterface::InitConnect()
 	connect(nScreenTime,SIGNAL(timeout()),this,SLOT(slots_CloseConnect()));
 	nScreenTime->start();
 
-// 	nUserWidget = new UserWidget();
-// 	connect(nUserWidget,SIGNAL(signal_TimeLogin(QTime)),this,SLOT(slots_TimeLogin(QTime)));
+ 	nUserWidget = new UserWidget();
+	connect(nUserWidget,SIGNAL(signal_LoginState(int)),this,SLOT(slots_loginState(int)));
 
 	nWarning = new Widget_Warning();
 	connect(this,SIGNAL(sianal_WarnMessage(int,QString)),nWarning,SLOT(slot_ShowMessage(int,QString)));
@@ -195,6 +196,7 @@ void MultiInterface::InitConnect()
 	connect(ui.pushButton_2,SIGNAL(clicked()),signal_mapper,SLOT(map()));
 	connect(ui.pushButton_Mode,SIGNAL(clicked()),signal_mapper,SLOT(map()));
 	connect(ui.pushButton_home,SIGNAL(clicked()),signal_mapper,SLOT(map()));
+	connect(ui.pushButton_lock,SIGNAL(clicked()),signal_mapper,SLOT(map()));
 
 	signal_mapper->setMapping(ui.pushButton_open1,0);
 	signal_mapper->setMapping(ui.pushButton_open2,1);
@@ -204,7 +206,10 @@ void MultiInterface::InitConnect()
 	signal_mapper->setMapping(ui.pushButton_2,5);
 	signal_mapper->setMapping(ui.pushButton_Mode,6);
 	signal_mapper->setMapping(ui.pushButton_home,7);
+	signal_mapper->setMapping(ui.pushButton_lock,8);
 	connect(signal_mapper, SIGNAL(mapped(int)), this, SLOT(slots_clickAccont(int)));
+
+	nUserWidget->show();
 }
 void MultiInterface::ChangeVncState(int nTest)
 {
@@ -213,6 +218,30 @@ void MultiInterface::ChangeVncState(int nTest)
 void MultiInterface::slots_ModeState(StateEnum nState,QString nTemp)
 {
 	SendBasicNet(nState,nTemp);
+}
+void MultiInterface::slots_loginState(int nPermiss)
+{
+	if(nPermiss == 3)//如果是三级权限表示只能让客户操作查询日志
+	{
+		ui.pushButton_open1->setEnabled(false);
+		ui.pushButton_open2->setEnabled(false);
+		ui.pushButton_open3->setEnabled(false);
+		ui.pushButton_2->setEnabled(false);
+		ui.pushButton_IO->setEnabled(false);
+		ui.pushButton_Alert->setEnabled(false);
+		ui.pushButton_Mode->setEnabled(false);
+		ui.pushButton_lock->setEnabled(true);
+	}else//二级权限暂时提供所有功能 
+	{
+		ui.pushButton_open1->setEnabled(true);
+		ui.pushButton_open2->setEnabled(true);
+		ui.pushButton_open3->setEnabled(true);
+		ui.pushButton_2->setEnabled(true);
+		ui.pushButton_IO->setEnabled(true);
+		ui.pushButton_Alert->setEnabled(true);
+		ui.pushButton_Mode->setEnabled(true);
+		ui.pushButton_lock->setEnabled(true);
+	}
 }
 void MultiInterface::SendBasicNet(StateEnum nState,QString nTemp)
 {
@@ -269,11 +298,11 @@ void MultiInterface::slots_clickAccont(int nTest)
 		ui.stackedWidget->setCurrentWidget(nWidgetCount);
 		Logfile->write(tr("into Count Interface"),OperationLog);
 		break;
+	case 8:
+		nUserWidget->show();
+		Logfile->write(tr("into lock Interface"),OperationLog);
+		break;
 	}
-}
-void MultiInterface::slots_TimeLogin(QTime nTime)
-{
-	n_StartTime = QDateTime::currentDateTime();
 }
 
 void MultiInterface::slots_SaveCountBytime()
@@ -281,7 +310,6 @@ void MultiInterface::slots_SaveCountBytime()
 	if(!SysConfigInfo.isSaveRecord)
 		return;
 	static bool isSave=false;
-
 	QTime time = QTime::currentTime();
 	if(SysConfigInfo.iSaveRecordInterval == 30)
 	{
@@ -312,7 +340,6 @@ void MultiInterface::slots_SaveCountBytime()
 			isSave =false;
 	}
 }
-
 void MultiInterface::slots_SaveCountByShift()
 {
 	if(!SysConfigInfo.isAutoClear)
@@ -347,7 +374,6 @@ void MultiInterface::slots_SaveCountByShift()
 	}
 
 }
-
 void MultiInterface::slots_UpdateRecordSet()
 {
 	QSettings SystemConfigSet(AppPaths.configPath,QSettings::IniFormat);
@@ -360,7 +386,6 @@ void MultiInterface::slots_UpdateRecordSet()
 	else
 		if(timerSaveList->isActive())   timerSaveList->stop();
 }
-
 void MultiInterface::slots_UpdateShiftSet()
 {
 	QSettings SystemConfigSet(AppPaths.configPath,QSettings::IniFormat);
@@ -370,7 +395,6 @@ void MultiInterface::slots_UpdateShiftSet()
 	SysConfigInfo.shift3Time = QTime::fromString(SystemConfigSet.value("System/shift3Time","230000").toString(),"hhmmss");
 	SysConfigInfo.isAutoClear = SystemConfigSet.value("System/isAutoClear",true).toBool();
 }
-
 void MultiInterface::slots_CloseConnect()
 {
 	POINT tgcPosition;
@@ -380,6 +404,8 @@ void MultiInterface::slots_CloseConnect()
 		//关闭远程界面
 		Logfile->write(QString("Auto disconnect!"),OperationLog);
 		mVNC_window->CloseWidget();
+		Sleep(2000);
+		nUserWidget->show();
 	}else{
 		gcPosition.x = tgcPosition.x;
 		gcPosition.y = tgcPosition.y;
@@ -487,7 +513,6 @@ void MultiInterface::SaveCountInfo()
 
 	return;
 }
-
 void MultiInterface::SaveToDatebase()
 {
 	QDateTime dateTime = QDateTime::currentDateTime();
@@ -521,7 +546,6 @@ void MultiInterface::SaveToDatebase()
 	*/
 	return;
 }
-
 void MultiInterface::ServerNewConnection()
 {
 	QTcpSocket* tcp = m_temptcpServer->nextPendingConnection(); //获取新的客户端信息
@@ -780,7 +804,6 @@ void MultiInterface::onServerConnected(QString IPAddress,bool nState)
 		ui.checkBox_3->setChecked(nState);
 	}
 }
-
 void MultiInterface::ClearCount(bool isChangeShift)
 {
 	if(!isChangeShift)
@@ -814,7 +837,6 @@ void MultiInterface::ClearCount(bool isChangeShift)
 	nAllFailNum = 0;
 	UpdateCountForShow();
 }
-
 void MultiInterface::UpdateCountForShow(bool isFirst)
 {
 	emit sianal_updateCountInfo(nAllCheckNum,nAllFailNum,0);
