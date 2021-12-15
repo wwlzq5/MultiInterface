@@ -127,6 +127,7 @@ public:
 	QTimer *timerSaveList;
 	int currentShift;
 	POINT gcPosition;
+	QByteArray m_buffer;
 private:
 	Ui::MultiInterfaceClass ui;
 };

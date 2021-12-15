@@ -209,7 +209,8 @@ void MultiInterface::InitConnect()
 	signal_mapper->setMapping(ui.pushButton_lock,8);
 	connect(signal_mapper, SIGNAL(mapped(int)), this, SLOT(slots_clickAccont(int)));
 
-	nUserWidget->show();
+	nUserWidget->hide();
+	slots_loginState(2);
 }
 void MultiInterface::ChangeVncState(int nTest)
 {
@@ -240,7 +241,7 @@ void MultiInterface::slots_loginState(int nPermiss)
 		ui.pushButton_IO->setEnabled(true);
 		ui.pushButton_Alert->setEnabled(true);
 		ui.pushButton_Mode->setEnabled(true);
-		ui.pushButton_lock->setEnabled(true);
+		ui.pushButton_lock->setEnabled(false);
 	}
 }
 void MultiInterface::SendBasicNet(StateEnum nState,QString nTemp)
@@ -250,6 +251,7 @@ void MultiInterface::SendBasicNet(StateEnum nState,QString nTemp)
 	{
 		MyStruct nData;
 		nData.nState = nState;
+		nData.nCount = sizeof(MyStruct);
 		if(nTemp != "NULL")
 		{
 			strcpy_s(nData.nTemp,nTemp.toLocal8Bit().data());
@@ -299,8 +301,8 @@ void MultiInterface::slots_clickAccont(int nTest)
 		Logfile->write(tr("into Count Interface"),OperationLog);
 		break;
 	case 8:
-		nUserWidget->show();
-		Logfile->write(tr("into lock Interface"),OperationLog);
+		//nUserWidget->show();
+		//Logfile->write(tr("into lock Interface"),OperationLog);
 		break;
 	}
 }
@@ -405,7 +407,7 @@ void MultiInterface::slots_CloseConnect()
 		Logfile->write(QString("Auto disconnect!"),OperationLog);
 		mVNC_window->CloseWidget();
 		Sleep(2000);
-		nUserWidget->show();
+		//nUserWidget->show();
 	}else{
 		gcPosition.x = tgcPosition.x;
 		gcPosition.y = tgcPosition.y;
@@ -588,92 +590,80 @@ void MultiInterface::onServerDataReady()
 {
 	QTcpSocket* m_tcpSocket = dynamic_cast<QTcpSocket*>(sender());
 	QByteArray buffer = m_tcpSocket->readAll();
-	
-	if(((MyStruct*)buffer.data())->nState == SENDDATA)
+	QByteArray TempBuffer;
+	m_buffer.append(buffer);
+	int totalLen = m_buffer.size();
+	QTime nTime =  QTime::currentTime();
+	QString m_ScreenLevel=0;
+	while(totalLen)  
 	{
-		int nGetDataSize = sizeof(MyStruct)+256*sizeof(MyErrorType);
-		if(buffer.size() == nGetDataSize && ((MyStruct*)buffer.data())->nUnit == LEADING)
+		if( totalLen < sizeof(MyStruct))  
 		{
-			nDataCount[0].push_back(buffer);
-		}else if(buffer.size() == nGetDataSize && ((MyStruct*)buffer.data())->nUnit == CLAMPING)
-		{
-			nDataCount[1].push_back(buffer);
-		}else if(buffer.size() == nGetDataSize && ((MyStruct*)buffer.data())->nUnit == BACKING)
-		{
-			nDataCount[2].push_back(buffer);
+			break;
 		}
-	}else if(((MyStruct*)buffer.data())->nState == CONNECT)//心跳包，用于判断是否掉线
-	{
-		int nGetDataSize = sizeof(MyStruct);
-		QTime nTime =  QTime::currentTime();
-		if(buffer.size() == nGetDataSize  && ((MyStruct*)buffer.data())->nUnit == LEADING)
+		int nCount = ((MyStruct*)m_buffer.data())->nCount;
+		if(totalLen < nCount)
 		{
-			IPAddress[0].nstate = true;
-			IPAddress[0].startTime = nTime.minute();
-		}else if(buffer.size() == nGetDataSize && ((MyStruct*)buffer.data())->nUnit == CLAMPING)
-		{
-			IPAddress[1].nstate = true;
-			IPAddress[1].startTime = nTime.minute();
-		}else if(buffer.size() == nGetDataSize && ((MyStruct*)buffer.data())->nUnit == BACKING)
-		{
-			IPAddress[2].nstate = true;
-			IPAddress[2].startTime = nTime.minute();
+			break;
 		}
-	}
-	else if(((MyStruct*)buffer.data())->nState == LOCKSCREEN)
-	{
-		//n_StartTime=QDateTime::currentDateTime();
-	}
-	else if(((MyStruct*)buffer.data())->nState == ALERT)//接口卡和错误显示
-	{
-		/*if(buffer.size() == sizeof(MyStruct))
+		switch(((MyStruct*)m_buffer.data())->nState)
 		{
-			int nTypeId = ((MyStruct*)buffer.data())->nCount;
-			if( nTypeId == -1)
-			{
-				emit sianal_WarnMessage(nTypeId,NULL);
-			}else{
-				emit sianal_WarnMessage(nTypeId,m_PLCAlertType.at(nTypeId));
-			}
-		}*/
-		if(buffer.size() == sizeof(MyStruct)+24*sizeof(int))
-		{
-			nDataList.push_back(buffer);
+			case SENDDATA:
+				if(((MyStruct*)m_buffer.data())->nUnit == LEADING)
+				{
+					TempBuffer = m_buffer.left(nCount);
+					nDataCount[0].push_back(TempBuffer);
+				}else if(((MyStruct*)m_buffer.data())->nUnit == CLAMPING)
+				{
+					TempBuffer = m_buffer.left(nCount);
+					nDataCount[1].push_back(TempBuffer);
+				}else if(((MyStruct*)m_buffer.data())->nUnit == BACKING)
+				{
+					TempBuffer = m_buffer.left(nCount);
+					nDataCount[2].push_back(TempBuffer);
+				}else{
+					Logfile->write("data lost!",CheckLog);
+				}
+				break;
+			case CONNECT:
+				if(((MyStruct*)m_buffer.data())->nUnit == LEADING)
+				{
+					IPAddress[0].nstate = true;
+					IPAddress[0].startTime = nTime.minute();
+				}else if(((MyStruct*)m_buffer.data())->nUnit == CLAMPING)
+				{
+					IPAddress[1].nstate = true;
+					IPAddress[1].startTime = nTime.minute();
+				}else if(((MyStruct*)m_buffer.data())->nUnit == BACKING)
+				{
+					IPAddress[2].nstate = true;
+					IPAddress[2].startTime = nTime.minute();
+				}
+				SendBasicNet(CONNECT,"NULL");
+				break;
+			case LOCKSCREEN:
+				nUserWidget->hide();
+				m_ScreenLevel = QString::number(((MyStruct*)m_buffer.data())->nFail);
+				slots_loginState(m_ScreenLevel.toInt());
+				SendBasicNet(LOCKSCREEN,m_ScreenLevel);
+				break;
+			case ALERT:
+				if(nCount == sizeof(MyStruct)+24*sizeof(int))
+				{
+					TempBuffer = m_buffer.left(nCount);
+					nDataList.push_back(TempBuffer);
+				}
+				break;
+			case MAININTERFACE:
+				mVNC_window->CloseWidget();
+				nSheetPage = MAININTERFACE;
+				break;
 		}
-	}else if(((MyStruct*)buffer.data())->nState == SEVERS)//从第四块接口卡获取过检总数和踢废总数
-	{
-		/*if(((MyStruct*)buffer.data())->nUnit = CLAMPING)
-		{
-		char* t_ptr = buffer.data();
-		t_ptr+=sizeof(MyStruct);
-		}*/
-		//nAllCheckNum = ((MyStruct*)buffer.data())->nCount;
-		//nAllFailNum = ((MyStruct*)buffer.data())->nFail;
-	}else if(((MyStruct*)buffer.data())->nState == NLEADING)// 切换到前端界面
-	{
-		if(nSheetPage != NLEADING)
-		{
-			ChangeVncState(0);
-			nSheetPage = NLEADING;
-		}
-	}else if(((MyStruct*)buffer.data())->nState == NCLAMPING)
-	{
-		if(nSheetPage != NCLAMPING)
-		{
-			ChangeVncState(1);
-			nSheetPage = NCLAMPING;
-		}
-	}else if(((MyStruct*)buffer.data())->nState == NBACKING)
-	{
-		if(nSheetPage != NBACKING)
-		{
-			ChangeVncState(2);
-			nSheetPage = NBACKING;
-		}
-	}else if(((MyStruct*)buffer.data())->nState == MAININTERFACE)
-	{
-		mVNC_window->CloseWidget();
-		nSheetPage = MAININTERFACE;
+		buffer = m_buffer.right(totalLen - nCount);  
+		//更新长度
+		totalLen = buffer.size();
+		//更新多余数据
+		m_buffer = buffer;  
 	}
 }
 DWORD WINAPI MultiInterface::DataCountThread( void *arg )
