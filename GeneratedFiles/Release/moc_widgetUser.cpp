@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'widgetUser.h'
 **
-** Created: Tue Nov 2 15:06:11 2021
+** Created: Wed Dec 8 14:00:46 2021
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.2)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -34,16 +34,16 @@ static const uint qt_meta_data_UserWidget[] = {
       12,   11,   11,   11, 0x05,
 
  // slots: signature, parameters, type, tag, flags
-      36,   11,   11,   11, 0x08,
-      50,   11,   11,   11, 0x08,
-      73,   11,   11,   11, 0x08,
-     101,   11,   11,   11, 0x08,
+      35,   11,   11,   11, 0x08,
+      49,   11,   11,   11, 0x08,
+      72,   11,   11,   11, 0x08,
+     100,   11,   11,   11, 0x08,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_UserWidget[] = {
-    "UserWidget\0\0signal_TimeLogin(QTime)\0"
+    "UserWidget\0\0signal_LoginState(int)\0"
     "slots_login()\0slots_changePassWrod()\0"
     "slots_loginChangePassWrod()\0"
     "slots_CancelchangePassWrod()\0"
@@ -55,7 +55,7 @@ void UserWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         Q_ASSERT(staticMetaObject.cast(_o));
         UserWidget *_t = static_cast<UserWidget *>(_o);
         switch (_id) {
-        case 0: _t->signal_TimeLogin((*reinterpret_cast< QTime(*)>(_a[1]))); break;
+        case 0: _t->signal_LoginState((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 1: _t->slots_login(); break;
         case 2: _t->slots_changePassWrod(); break;
         case 3: _t->slots_loginChangePassWrod(); break;
@@ -105,7 +105,7 @@ int UserWidget::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 
 // SIGNAL 0
-void UserWidget::signal_TimeLogin(QTime _t1)
+void UserWidget::signal_LoginState(int _t1)
 {
     void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 0, _a);

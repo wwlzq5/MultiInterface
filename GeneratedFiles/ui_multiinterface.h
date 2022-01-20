@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'multiinterface.ui'
 **
-** Created: Tue Nov 2 15:06:11 2021
+** Created: Wed Dec 8 13:57:40 2021
 **      by: Qt User Interface Compiler version 4.8.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -44,6 +44,7 @@ public:
     QPushButton *pushButton_IO;
     QPushButton *pushButton_Alert;
     QPushButton *pushButton_Mode;
+    QPushButton *pushButton_lock;
     QSpacerItem *verticalSpacer;
     QGridLayout *gridLayout;
     QLabel *label;
@@ -164,6 +165,11 @@ public:
 
         verticalLayout->addWidget(pushButton_Mode);
 
+        pushButton_lock = new QPushButton(widget);
+        pushButton_lock->setObjectName(QString::fromUtf8("pushButton_lock"));
+
+        verticalLayout->addWidget(pushButton_lock);
+
         verticalSpacer = new QSpacerItem(20, 406, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
         verticalLayout->addItem(verticalSpacer);
@@ -241,6 +247,7 @@ public:
         pushButton_IO->setText(QApplication::translate("MultiInterfaceClass", "Open Card", 0, QApplication::UnicodeUTF8));
         pushButton_Alert->setText(QApplication::translate("MultiInterfaceClass", "Alert Setting", 0, QApplication::UnicodeUTF8));
         pushButton_Mode->setText(QApplication::translate("MultiInterfaceClass", "Product Mode", 0, QApplication::UnicodeUTF8));
+        pushButton_lock->setText(QApplication::translate("MultiInterfaceClass", "System Lock", 0, QApplication::UnicodeUTF8));
         label->setText(QApplication::translate("MultiInterfaceClass", "Front state", 0, QApplication::UnicodeUTF8));
         checkBox->setText(QString());
         label_2->setText(QApplication::translate("MultiInterfaceClass", "Clamp state", 0, QApplication::UnicodeUTF8));
