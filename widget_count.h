@@ -61,10 +61,12 @@ private slots:
 	void slot_DeleteRecord_clicked();
 	void slot_OpenExcel_clicked();
 	void slot_SearchShift_clicked();
+	void slot_SaveRecord_clicked();
 
 signals:
 	void updateRecordSet();
 	void updateShiftSet();
+	void signal_SaveRecord();
 
 public slots:
 	/**********************************************************

@@ -3,7 +3,6 @@
 #include <windows.h>
 #include "ui_multiinterface.h"
 #include <QCloseEvent>
-#include "widgetSever.h"
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QList>
@@ -63,11 +62,10 @@ public:
 	void onServerConnected(QString IPAddress,bool nState);
 	void ClearCount(bool isChangeShift = true);
 	void UpdateCountForShow(bool isFirst=false);
-	void SaveCountInfo();
+	void SaveCountInfo(SaveReportType pType,QString pTxt="");
 	void SaveToDatebase();
 	void SendBasicNet(StateEnum,QString);
-	void ChangeVncState(int);
-
+	bool CheckLicense();
 public:
 	int nSheetPage;
 	bool nOver;
@@ -91,6 +89,8 @@ public slots:
 	void slots_CloseConnect();
 	void slot_StateChanged(QAbstractSocket::SocketState);
 	void slots_loginState(int);
+	void slots_SaveRecord();
+	//void slots_disConnected();
 public:
 	static DWORD WINAPI DataHanldThread( void *arg );
 	static DWORD WINAPI DataCountThread( void *arg );
@@ -101,12 +101,12 @@ public:
 	QMutex nCountLock;
 	QTimer* nConnectState;
 	QStringList m_PLCAlertType;
+	QStringList m_CustomAlertType;
 	QVector<IpStruct> IPAddress;
 	QTcpServer* m_temptcpServer;
 	QSignalMapper* signal_mapper;
 	DataBase* m_Datebase;
 	QList<QByteArray> nDataList;
-	VNC_widget* mVNC_window;
 	IOCardClass* nIOCard[3];
 	CLogFile* Logfile;
 	QWidget * nIOprence;
@@ -120,6 +120,8 @@ public:
 	cErrorInfo nRunInfo,LastRunInfo,nTmpcountData;
 	SystemConfigInfo SysConfigInfo;
 public:
+	int surplusDays;
+	int StatusTypeNumber;
 	int nAllCheckNum;
 	int nAllFailNum;
 	QDateTime n_StartTime;
@@ -128,6 +130,9 @@ public:
 	int currentShift;
 	POINT gcPosition;
 	QByteArray m_buffer;
+	QMutex SockectMutex;
+	QList<QTcpSocket*> clientSocket;
+	int nErrorCount;
 private:
 	Ui::MultiInterfaceClass ui;
 };

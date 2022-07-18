@@ -21,7 +21,7 @@ void widget_Alert::initSocket()
 void widget_Alert::initConfig()
 {
 	//∂¡»°≈‰÷√¥ÌŒÛ–≈œ¢
-	QSettings erroriniset("./Config/ErrorType.ini",QSettings::IniFormat);
+	QSettings erroriniset("../Config/ErrorType.ini",QSettings::IniFormat);
 	erroriniset.setIniCodec(QTextCodec::codecForName("GBK"));
 	QString strSession;
 	strSession = QString("/ErrorType/total");

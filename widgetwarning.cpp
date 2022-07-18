@@ -59,23 +59,16 @@ void Widget_Warning::slot_ShowMessage(int warningType, QString warningInfo)
 	{
 		return;
 	}
-	iWarningType = iWarningType;
+	iWarningType = warningType;
 	if(warningType == -1)
 	{
-		if(pMainFrm->nSheetPage == MAININTERFACE)
-		{
-			hide();
-		}else{
-			pMainFrm->SendBasicNet(SEVERS,"NULL");
-		}
+		pMainFrm->SendBasicNet(SEVERS,"NULL");
 	}else{
 		labelWarningInfo->setText(warningInfo);
 		QDesktopWidget* desktopWidget = QApplication::desktop();
 		move(desktopWidget->width()-400,desktopWidget->height()-300);
-		if(pMainFrm->nSheetPage == MAININTERFACE)
+		if(warningInfo != "")
 		{
-			show();
-		}else{
 			pMainFrm->SendBasicNet(SEVERS,warningInfo);
 		}
 	}

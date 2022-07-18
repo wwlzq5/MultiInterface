@@ -10,7 +10,7 @@ UserWidget::UserWidget(QWidget *parent)
 	ui.lineEdit_passWord2->setEchoMode(QLineEdit::Password); 
 	ui.lineEdit_newPassWord->setEchoMode(QLineEdit::Password); 
 	ui.pushButton_login->setShortcut( QKeySequence::InsertParagraphSeparator );
-	nPermission = 0;
+	nPermission = 3;
 	iUserPerm = true;
 	initial();
 	QPixmap pixmap = QPixmap(":/MultiInterface/NOLOGIN");

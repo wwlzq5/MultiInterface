@@ -9,6 +9,7 @@ DataBase::DataBase(QString spath)
 	createConnection();
 	createReportTable();
 	createLastDataTable();
+	createLastTimeDataTable();
 }
 //建立一个数据库连接
 bool DataBase::createConnection()
@@ -42,6 +43,17 @@ bool DataBase::createLastDataTable()
 		m_db.open();
 	QSqlQuery query(m_db);
 	QString sql("create table LastData(AllCount int,failCount int,iAllcount int,FrontErrorByType blob,ClampErrorByType blob,RearErrorByType blob)");
+	bool ret=query.exec(sql);
+	return ret;
+}
+
+bool DataBase::createLastTimeDataTable()
+{
+	QSqlDatabase m_db = QSqlDatabase::database(sqlConnectName);
+	if(!m_db.isOpen())
+		m_db.open();
+	QSqlQuery query(m_db);
+	QString sql("create table LastTimeData(iAllcount int,FrontErrorByType blob,ClampErrorByType blob,RearErrorByType blob)");
 	bool ret=query.exec(sql);
 	return ret;
 }
@@ -229,6 +241,67 @@ bool DataBase::queryLastData(int &AllCount,int &failCount,cErrorInfo &info)
 			frontData = query.value(3).toByteArray();
 			ClampData = query.value(4).toByteArray();
 			RearData  = query.value(5).toByteArray();
+
+			for (int i=0;i<50;i++)
+			{
+				int tmp=0;
+				memcpy(&tmp,frontData.data() + sizeof(int)*i,sizeof(int));
+				info.iFrontErrorByType[i]=tmp;
+				tmp=0;
+				memcpy(&tmp,ClampData.data() + sizeof(int)*i,sizeof(int));
+				info.iClampErrorByType[i]=tmp;
+				tmp=0;
+				memcpy(&tmp,RearData.data() + sizeof(int)*i,sizeof(int));
+				info.iRearErrorByType[i]=tmp;
+			}
+
+		}
+	}
+	return ret;
+}
+
+bool DataBase::insertLastTimeData( cErrorInfo info )
+{
+	QByteArray frontData,ClampData,RearData;
+	frontData.append((char*)info.iFrontErrorByType,sizeof(int)*50);
+	ClampData.append((char*)info.iClampErrorByType,sizeof(int)*50);
+	RearData.append((char*)info.iRearErrorByType,sizeof(int)*50);
+
+	QSqlDatabase m_db = QSqlDatabase::database(sqlConnectName);
+	if(!m_db.isOpen())
+		m_db.open();
+	QSqlQuery query(m_db);
+	QString deleteSql = "delete from LastTimeData";
+	query.exec(deleteSql);
+
+	QString strsql = "insert into LastTimeData(iAllcount,FrontErrorByType,ClampErrorByType,RearErrorByType) values(:iAllcount,:FrontErrorByType,:ClampErrorByType,:RearErrorByType)";
+	query.prepare(strsql);
+	query.bindValue(":iAllcount",info.iAllCount);
+	query.bindValue(":FrontErrorByType",frontData);
+	query.bindValue(":ClampErrorByType",ClampData);
+	query.bindValue(":RearErrorByType",RearData);	
+	bool ret = query.exec();
+	return ret;
+}
+
+bool DataBase::queryLastTimeData( cErrorInfo &info )
+{
+	QByteArray frontData,ClampData,RearData;
+	QSqlDatabase m_db = QSqlDatabase::database(sqlConnectName);
+	if(!m_db.isOpen())
+		m_db.open();
+	QSqlQuery query(m_db);
+	QString sql = QString("select * from LastTimeData");
+	bool ret = query.exec(sql);
+	if(ret)
+	{
+		//QSqlRecord rec = query.record();
+		while(query.next())
+		{
+			info.iAllCount = query.value(0).toInt();
+			frontData = query.value(1).toByteArray();
+			ClampData = query.value(2).toByteArray();
+			RearData  = query.value(3).toByteArray();
 
 			for (int i=0;i<50;i++)
 			{

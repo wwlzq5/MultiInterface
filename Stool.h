@@ -7,9 +7,9 @@
 
 
 
-// #define IP1 "10.41.61.15"
-// #define IP2 "10.41.63.241"
-// #define IP3 "10.41.61.10"
+//#define IP1 "192.168.250.201"
+//#define IP2 "192.168.20.101"
+//#define IP3 "192.168.250.203"
 
 #define IP1 "192.168.250.201"
 #define IP2 "192.168.250.202"
@@ -33,13 +33,21 @@ enum StateEnum
 	MAININTERFACE,
 	SYSTEMMODEADD,
 	SYSTEMMODESELECT,
-	SYSTEMMODEDELTE
+	SYSTEMMODEDELTE,
+	ONLYSHOWSEVER,
+	FRONTSTATE
 };
 enum UnitEnum
 {
 	LEADING, //前端
 	CLAMPING,//夹持
 	BACKING//后端
+};
+
+enum SaveReportType
+{
+	ByTime,		//按整点时间
+	ByShift		//按班次
 };
 
 struct IpStruct
@@ -58,7 +66,8 @@ struct MyStruct
 {
 	StateEnum nState;//发送状态标志位
 	UnitEnum nUnit;//发送的设备标志位
-	int nCount;//前端通过in0得到的过检总数
+	int nCount;//数据大小
+	int nCheckNum;//前端通过in0得到的过检总数
 	int nFail;//前端通过out3得到的踢废总数
 	char nTemp[256];//前端的多余变量
 };

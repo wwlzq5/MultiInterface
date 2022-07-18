@@ -149,6 +149,7 @@ void widget_count::init()
 	connect(ui.pushButton_deleteRecord,SIGNAL(clicked()),this,SLOT(slot_DeleteRecord_clicked()));
 	connect(ui.Btn_OpenExcel,SIGNAL(clicked()),this,SLOT(slot_OpenExcel_clicked()));
 	connect(ui.pushButton_Search,SIGNAL(clicked()),this,SLOT(slot_SearchShift_clicked()));
+	connect(ui.pushButton_SaveRecord,SIGNAL(clicked()),this,SLOT(slot_SaveRecord_clicked()));
 
 	ExportThread=new ExportExcelThread(this);
 }
@@ -437,6 +438,11 @@ void widget_count::slot_SearchShift_clicked()
 		slots_ShowShiftIamge(startTime,endTime,tmpTimes,tmpInfos);
 	}
 	
+}
+
+void widget_count::slot_SaveRecord_clicked()
+{
+	emit signal_SaveRecord();
 }
 
 void widget_count::slots_ShowPie(QModelIndex modelIndex)

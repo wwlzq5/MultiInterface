@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'clogfile.h'
 **
-** Created: Tue Nov 2 15:06:11 2021
+** Created: Fri Mar 4 10:05:46 2022
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.2)
 **
 ** WARNING! All changes made in this file will be lost!

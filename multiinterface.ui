@@ -179,6 +179,12 @@ QPushButton:pressed{
        </item>
        <item>
         <widget class="QPushButton" name="pushButton_lock">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
           <string>System Lock</string>
          </property>
@@ -206,13 +212,6 @@ QPushButton:pressed{
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QCheckBox" name="checkBox">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="0">
           <widget class="QLabel" name="label_2">
            <property name="text">
@@ -227,10 +226,10 @@ QPushButton:pressed{
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_3">
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="checkBox">
            <property name="text">
-            <string>Rear state</string>
+            <string/>
            </property>
           </widget>
          </item>
@@ -241,7 +240,24 @@ QPushButton:pressed{
            </property>
           </widget>
          </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Rear state</string>
+           </property>
+          </widget>
+         </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_version">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

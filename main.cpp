@@ -80,13 +80,15 @@ int main(int argc, char *argv[])
 	a.installTranslator(translator);
 	
 	MultiInterface w;
+	w.CheckLicense();
 	w.showMaximized();
+	w.hide();
 	return a.exec();
 }
 long  __stdcall CrashInfocallback( _EXCEPTION_POINTERS *pexcp)
 {
 	HANDLE hDumpFile = ::CreateFile(
-		L"MEMORY.DMP",
+		L"MEMORY1.DMP",
 		GENERIC_WRITE,
 		0,
 		NULL,

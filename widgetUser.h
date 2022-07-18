@@ -23,12 +23,13 @@ public:
 signals:
 	void signal_LoginState(int);
 private:
-	int nPermission;
 	QString strUserName;
 	QString PassWord;
 	QString strPassWordUser;
 	QString strPassWordAdmin;
 	bool iUserPerm;
+public:
+	int nPermission;
 private:
 	void initial();
 private slots:

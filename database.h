@@ -17,12 +17,15 @@ public:
 	bool createConnection();  //创建一个连接
 	bool createReportTable();       //创建数据库表
 	bool createLastDataTable();       //创建用于保存上一次历史数据的表
+	bool createLastTimeDataTable();       //创建用于保存上一次整点历史数据的表
 	bool insert(QString timestr,cErrorInfo info);
 	bool queryByOnce(QString timeStr,long long &ptime,cErrorInfo &info);										//timeStr: yyyyMMddhhmm
 	bool queryByDay(QString dayStr,QList<long long> &pTimes,QList<cErrorInfo> &infos);							//daystr : yyyyMMdd
 	bool queryByShift(QString pStartTime,QString pEndTime,QList<long long> &pTimes,QList<cErrorInfo> &infos);	//daystr : yyyyMMdd
-	bool insertLastData(int AllCount,int failCount,cErrorInfo info);																		//插入历史数据
-	bool queryLastData(int &AllCount,int &failCount,cErrorInfo &info);																		//查询历史数据
+	bool insertLastData(int AllCount,int failCount,cErrorInfo info);											//插入历史数据
+	bool queryLastData(int &AllCount,int &failCount,cErrorInfo &info);											//查询历史数据
+	bool insertLastTimeData(cErrorInfo info);										//插入整点历史数据
+	bool queryLastTimeData(cErrorInfo &info);										//查询整点历史数据
 
 private:
 	QString sqlConnectName;

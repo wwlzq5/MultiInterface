@@ -587,7 +587,7 @@ QCalendarWidget QMenu {
        <height>16777215</height>
       </size>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,3,2,2">
+     <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,3,0,2">
       <property name="spacing">
        <number>5</number>
       </property>
@@ -747,10 +747,7 @@ QCalendarWidget QMenu {
          <property name="topMargin">
           <number>30</number>
          </property>
-         <item row="0" column="0" colspan="3">
-          <widget class="QCalendarWidget" name="calendarWidget"/>
-         </item>
-         <item row="1" column="0">
+         <item row="1" column="1">
           <widget class="QComboBox" name="comboBox">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -766,7 +763,7 @@ QCalendarWidget QMenu {
            </property>
            <property name="maximumSize">
             <size>
-             <width>80</width>
+             <width>100</width>
              <height>38</height>
             </size>
            </property>
@@ -782,7 +779,7 @@ QCalendarWidget QMenu {
            </item>
           </widget>
          </item>
-         <item row="1" column="1">
+         <item row="1" column="2">
           <widget class="QPushButton" name="pushButton_openRecord">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -798,7 +795,7 @@ QCalendarWidget QMenu {
            </property>
            <property name="maximumSize">
             <size>
-             <width>80</width>
+             <width>100</width>
              <height>40</height>
             </size>
            </property>
@@ -813,7 +810,10 @@ QCalendarWidget QMenu {
            </property>
           </widget>
          </item>
-         <item row="1" column="2">
+         <item row="0" column="0" colspan="4">
+          <widget class="QCalendarWidget" name="calendarWidget"/>
+         </item>
+         <item row="1" column="3">
           <widget class="QPushButton" name="pushButton_deleteRecord">
            <property name="minimumSize">
             <size>
@@ -823,7 +823,7 @@ QCalendarWidget QMenu {
            </property>
            <property name="maximumSize">
             <size>
-             <width>80</width>
+             <width>100</width>
              <height>40</height>
             </size>
            </property>
@@ -835,6 +835,25 @@ QCalendarWidget QMenu {
            </property>
            <property name="text">
             <string>Delete record</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QPushButton" name="pushButton_SaveRecord">
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Save Record</string>
            </property>
           </widget>
          </item>
@@ -852,19 +871,31 @@ QCalendarWidget QMenu {
          <property name="topMargin">
           <number>30</number>
          </property>
-         <item row="0" column="0">
-          <widget class="QCheckBox" name="checkBox_saveRecord">
+         <item row="2" column="0" colspan="2">
+          <widget class="QRadioButton" name="radioButton_30minite">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
             </font>
            </property>
            <property name="text">
-            <string>Save Record</string>
+            <string>Save record every 30minite</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
+         <item row="3" column="0" colspan="2">
+          <widget class="QRadioButton" name="radioButton_60minite">
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>Save record every 60minite</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0" colspan="2">
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
             <widget class="QPushButton" name="pushButton_saveRecordOK">
@@ -916,27 +947,15 @@ QCalendarWidget QMenu {
            </item>
           </layout>
          </item>
-         <item row="1" column="0">
-          <widget class="QRadioButton" name="radioButton_30minite">
+         <item row="1" column="0" colspan="2">
+          <widget class="QCheckBox" name="checkBox_saveRecord">
            <property name="font">
             <font>
              <pointsize>12</pointsize>
             </font>
            </property>
            <property name="text">
-            <string>Save record every 30minite</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QRadioButton" name="radioButton_60minite">
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Save record every 60minite</string>
+            <string>Save Record</string>
            </property>
           </widget>
          </item>

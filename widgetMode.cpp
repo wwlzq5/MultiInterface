@@ -11,7 +11,7 @@ widget_Mode::widget_Mode()
 }
 widget_Mode::~widget_Mode()
 {
-	close();
+	//close();
 }
 void widget_Mode::initSocket()
 {
@@ -244,7 +244,16 @@ void widget_Mode::slot_loadMode()//¼ÓÔØÄ£°å
 {
 	if(nListNo>=0)
 	{
-		setWindowTitle(tr("current mode")+": "+nModeList.at(nListNo).sModeName);
+		/*int tCount = nModelExcel->rowCount();
+		for(int i=0;i<tCount;i++)
+		{
+		nModelExcel->item(i,0)->setBackground(QColor(Qt::gray));
+		nModelExcel->item(i,1)->setBackground(QColor(Qt::gray));
+		nModelExcel->item(i,2)->setBackground(QColor(Qt::gray));
+		}
+		nModelExcel->item(nListNo,0)->setBackground(QColor(Qt::green));
+		nModelExcel->item(nListNo,1)->setBackground(QColor(Qt::green));
+		nModelExcel->item(nListNo,2)->setBackground(QColor(Qt::green));*/
 		emit signal_ModeState(SYSTEMMODESELECT,nModeList.at(nListNo).sModeName);
 		QMessageBox::information(this,tr("Information"),tr("check mode success"));
 	}else{

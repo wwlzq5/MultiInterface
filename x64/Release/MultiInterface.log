@@ -1,3 +1,119 @@
-﻿  LINK : 没有找到 ..\x64\123\\MultiInterface.exe 或上一个增量链接没有生成它；正在执行完全链接
+﻿  Moc'ing multiinterface.h...
+  Qt: Untested Windows version 6.2 detected!
+  Uic'ing multiinterface.ui...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing widgetAlert.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing widgetWarning.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing widgetUser.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing IOCard.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing clogfile.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing widgetSever.h...
+  Qt: Untested Windows version 6.2 detected!
+  Rcc'ing multiinterface.qrc...
+  Qt: Untested Windows version 6.2 detected!
+  Uic'ing IOCard.ui...
+  Qt: Untested Windows version 6.2 detected!
+E:\MultiInterface\MultiInterface\IOCard.ui : warning : The name 'layoutWidget' (QWidget) is already in use, defaulting to 'layoutWidget1'.
+E:\MultiInterface\MultiInterface\IOCard.ui : warning : The name 'layoutWidget' (QWidget) is already in use, defaulting to 'layoutWidget2'.
+E:\MultiInterface\MultiInterface\IOCard.ui : warning : The name 'layoutWidget' (QWidget) is already in use, defaulting to 'layoutWidget3'.
+  Uic'ing AlertWidget.ui...
+  Qt: Untested Windows version 6.2 detected!
+  Uic'ing userwidget.ui...
+  Qt: Untested Windows version 6.2 detected!
+  Performing Custom Build Tools
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing dhbasewidget.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing pieview.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing qcustomplot.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing widget_count.h...
+  Qt: Untested Windows version 6.2 detected!
+  Uic'ing ProdectMode.ui...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing widgetMode.h...
+  Qt: Untested Windows version 6.2 detected!
+  Moc'ing ExcelObject.h...
+  Qt: Untested Windows version 6.2 detected!
+  clogfile.cpp
+  database.cpp
+  dhbasewidget.cpp
+  ExcelObject.cpp
+  moc_clogfile.cpp
+  moc_dhbasewidget.cpp
+  moc_ExcelObject.cpp
+  moc_IOCard.cpp
+  moc_multiinterface.cpp
+  moc_pieview.cpp
+  moc_qcustomplot.cpp
+  moc_widgetAlert.cpp
+  moc_widgetMode.cpp
+  moc_widgetSever.cpp
+  moc_widgetUser.cpp
+  moc_widgetWarning.cpp
+  moc_widget_count.cpp
+  IOCard.cpp
+  main.cpp
+  multiinterface.cpp
+  Generating Code...
+  Compiling...
+  pieview.cpp
+  qcustomplot.cpp
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\algorithm(3699): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+          C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\algorithm(3714): 参见对正在编译的函数 模板 实例化“void std::_Median<_RanIt,bool(__cdecl *)(const QCPDataRange &,const QCPDataRange &)>(_RanIt,_RanIt,_RanIt,_Pr)”的引用
+          with
+          [
+              _RanIt=QList<QCPDataRange>::iterator,
+              _Pr=bool (__cdecl *)(const QCPDataRange &,const QCPDataRange &)
+          ]
+          C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\algorithm(3776): 参见对正在编译的函数 模板 实例化“std::pair<_Ty1,_Ty2> std::_Unguarded_partition<_RanIt,bool(__cdecl *)(const QCPDataRange &,const QCPDataRange &)>(_RanIt,_RanIt,_Pr)”的引用
+          with
+          [
+              _Ty1=QList<QCPDataRange>::iterator,
+              _Ty2=QList<QCPDataRange>::iterator,
+              _RanIt=QList<QCPDataRange>::iterator,
+              _Pr=bool (__cdecl *)(const QCPDataRange &,const QCPDataRange &)
+          ]
+          C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\algorithm(3806): 参见对正在编译的函数 模板 实例化“void std::_Sort<_Iter,int,bool(__cdecl *)(const QCPDataRange &,const QCPDataRange &)>(_RanIt,_RanIt,_Diff,_Pr)”的引用
+          with
+          [
+              _Iter=QList<QCPDataRange>::iterator,
+              _RanIt=QList<QCPDataRange>::iterator,
+              _Diff=int,
+              _Pr=bool (__cdecl *)(const QCPDataRange &,const QCPDataRange &)
+          ]
+          qcustomplot.cpp(2585): 参见对正在编译的函数 模板 实例化“void std::sort<QList<T>::iterator,bool(__cdecl *)(const QCPDataRange &,const QCPDataRange &)>(_RanIt,_RanIt,_Pr)”的引用
+          with
+          [
+              T=QCPDataRange,
+              _RanIt=QList<QCPDataRange>::iterator,
+              _Pr=bool (__cdecl *)(const QCPDataRange &,const QCPDataRange &)
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\algorithm(3699): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\algorithm(3700): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\algorithm(3700): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\algorithm(3701): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\algorithm(3701): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\algorithm(3702): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\include\algorithm(3702): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+  widgetAlert.cpp
+  widgetMode.cpp
+  widgetUser.cpp
+  widgetwarning.cpp
+  widgetSever.cpp
+  widget_count.cpp
+  Generating Code...
+d:\4.8.2_64\include\qtcore\qsharedpointer_impl.h(204): warning C4793: “QtSharedPointer::ExternalRefCountData::setQObjectShared”: 编译为本机的函数:
+  	/clr 下不支持 varargs
+d:\4.8.2_64\include\qtcore\qsharedpointer_impl.h(204): warning C4793: “QtSharedPointer::ExternalRefCountData::setQObjectShared”: 编译为本机的函数:
+  	/clr 下不支持 varargs
+  qrc_multiinterface.cpp
+  .NETFramework,Version=v4.0.AssemblyAttributes.cpp
      正在创建库 ..\x64\123\\MultiInterface.lib 和对象 ..\x64\123\\MultiInterface.exp
   MultiInterface.vcxproj -> E:\MultiInterface\MultiInterface\..\x64\123\MultiInterface.exe
